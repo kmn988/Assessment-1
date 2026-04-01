@@ -26,20 +26,20 @@ const BarChart = ({ data }: any) => {
   }
 
   // Sort chronologically
-  const sortedEntries = Object.entries(monthlyTotals).sort((a, b) => {
-    const toDate = (label: string) => {
-      const [mon, year] = label.split(" ");
-      return new Date(`${mon} 1, ${year}`).getTime();
-    };
-    return toDate(a[0]) - toDate(b[0]);
-  });
+  // const sortedEntries = Object.entries(monthlyTotals).sort((a, b) => {
+  //   const toDate = (label: string) => {
+  //     const [mon, year] = label.split(" ");
+  //     return new Date(`${mon} 1, ${year}`).getTime();
+  //   };
+  //   return toDate(a[0]) - toDate(b[0]);
+  // });
 
-  const labels = sortedEntries.map(([k]) => k);
-  const amounts = sortedEntries.map(([, v]) => v);
+  // const labels = sortedEntries.map(([k]) => k);
+  // const amounts = sortedEntries.map(([, v]) => v);
 
   const commonDataset = {
     label: "Monthly Spend",
-    data: amounts,
+    data: monthlyTotals,
     borderColor: "#c8f03c",
     borderWidth: 2,
     pointBackgroundColor: "#c8f03c",
@@ -48,7 +48,7 @@ const BarChart = ({ data }: any) => {
   };
 
   const chartData = {
-    labels,
+    labels: MONTHS,
     datasets: [
       {
         ...commonDataset,
@@ -92,7 +92,6 @@ const BarChart = ({ data }: any) => {
       },
     },
   };
-  return <></>;
   return <Bar data={chartData} options={options} />;
 };
 
