@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import DeleteAction from "./DeleteAction";
 import ChangeAction from "./ChangeAction";
 import DonutChart from "./DonutChart";
 import MonthSelector from "./MonthSelector";
+import CategoryBreakdown from "./CategoryBreakdown";
+import axiosInstance from "./config/axios";
 export interface Expense {
   id: number;
   title: string;
@@ -11,12 +13,22 @@ export interface Expense {
   amount: string;
   description: string;
 }
+interface ExpenseTableProps {
+  data: Expense[];
+  setExpenses: React.Dispatch<React.SetStateAction<Expense[]>>;
+}
+
 const ExpenseTable = () => {
   const [selected, setSelected] = useState("All");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
+  const [search, setSearch] = useState("");
+  const [period, setPeriod] = useState({
+    month: new Date().getMonth(),
+    year: new Date().getFullYear(),
+  });
   const [expenses, setExpenses] = useState<Expense[]>([
     {
       id: 1,
@@ -51,12 +63,8 @@ const ExpenseTable = () => {
       description: "Flat",
     },
   ]);
-  const [search, setSearch] = useState("");
+
   const buttons = ["All", "Food", "Exercise", "Entertainment", "Utilities"];
-  const [period, setPeriod] = useState({
-    month: new Date().getMonth(),
-    year: new Date().getFullYear(),
-  });
   const filtered = expenses.filter((item) => {
     const matchCategory = selected === "All" || item.category === selected;
     const matchSearch =
@@ -68,22 +76,29 @@ const ExpenseTable = () => {
   const actionButtons = [
     {
       title: "Edit",
-      action: () => {
+      action: (item: Expense) => {
         setShowEditModal(true);
+        setSelectedExpense(item);
       },
     },
     {
       title: "Delete",
-      action: () => {
+      action: (item: Expense) => {
         setShowDeleteModal(true);
+        setSelectedExpense(item);
       },
     },
   ];
-  const handleCreate = (form: Omit<Expense, "id">) => {
-    setExpenses((prev) => [...prev, { ...form, id: Date.now() }]);
+  const handleCreate = async (form: Omit<Expense, "id">) => {
+    const expense: Expense = await axiosInstance.post("/expense/", form);
+    setExpenses((prev) => [...prev, { ...form, id: expense.id }]);
   };
 
-  const handleEdit = (form: Omit<Expense, "id">) => {
+  const handleEdit = async (form: Omit<Expense, "id">) => {
+    const updatedExpense: Expense = await axiosInstance.put(
+      `/expense/${selectedExpense?.id}`,
+      form,
+    );
     setExpenses((prev) =>
       prev.map((item) =>
         item.id === selectedExpense?.id ? { ...form, id: item.id } : item,
@@ -96,6 +111,20 @@ const ExpenseTable = () => {
     );
     setShowDeleteModal(false);
   };
+
+  useEffect(() => {
+    axiosInstance
+      .get("/expenses", {
+        params: {
+          month: period.month + 1,
+          year: period.year,
+        },
+      })
+      .then((res) => {
+        setExpenses(res.data);
+      });
+  }, []);
+
   return (
     <div className="w-full ">
       <div className="flex justify-end m-4">
@@ -109,7 +138,7 @@ const ExpenseTable = () => {
           prevent="Edit"
           isOpen={showCreateModal}
           onClose={() => setShowCreateModal(false)}
-          expense={selectedExpense}
+          expense={null}
           onSubmit={handleCreate}
         />
       </div>
@@ -155,11 +184,7 @@ const ExpenseTable = () => {
                 </thead>
                 <tbody>
                   {filtered.map((item) => (
-                    <tr
-                      className=" border-t-2 border-solid"
-                      onClick={() => setSelectedExpense(item)}
-                      key={item.id}
-                    >
+                    <tr className=" border-t-2 border-solid" key={item.id}>
                       <td className="p-3">{item.title}</td>
                       <td className="p-3">
                         <div className="rounded-2xl border-2 border-solid w-fit px-2">
@@ -173,7 +198,7 @@ const ExpenseTable = () => {
                           <div>
                             <button
                               className="border-solid border-2 rounded-full px-2 hover:cursor-pointer"
-                              onClick={button.action}
+                              onClick={() => button.action(item)}
                               key={button.title}
                             >
                               {button.title}
@@ -187,7 +212,7 @@ const ExpenseTable = () => {
                     prevent="Create"
                     isOpen={showEditModal}
                     onClose={() => setShowEditModal(false)}
-                    expense={null}
+                    expense={selectedExpense}
                     onSubmit={handleEdit}
                   />
                   <DeleteAction
@@ -198,8 +223,11 @@ const ExpenseTable = () => {
                 </tbody>
               </table>
             </div>
-            <div className="col-span-1 w-full h-75 flex items-center justify-start">
-              <DonutChart data={expenses} />
+            <div className="col-span-1 flex flex-col w-full gap-7">
+              <div className=" w-full h-75 ">
+                <DonutChart data={expenses} />
+              </div>
+              <CategoryBreakdown data={expenses} />
             </div>
           </div>
         )}

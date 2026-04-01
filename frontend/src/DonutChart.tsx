@@ -8,6 +8,7 @@ import type {
   ChartOptions,
   Plugin,
 } from "chart.js/auto";
+import axiosInstance from "./config/axios";
 interface DonutChartProps {
   data: Expense[];
 }
@@ -26,7 +27,6 @@ const DonutChart = ({ data }: DonutChartProps) => {
     acc[item.category] = (acc[item.category] || 0) + Number(item.amount);
     return acc;
   }, {});
-  console.log(categoryTotals);
 
   const labels = Object.keys(categoryTotals);
   const amounts = Object.values(categoryTotals);
@@ -68,6 +68,7 @@ const DonutChart = ({ data }: DonutChartProps) => {
           },
         },
       },
+      //This still works
       legendDistance: {
         padding: 50,
       },

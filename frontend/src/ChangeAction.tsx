@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Modal from "./Modal";
 import type { Expense } from "./ExpenseTable";
 
@@ -33,7 +33,6 @@ const ChangeAction = ({
   onSubmit,
 }: ChangeActionProps) => {
   const [form, setForm] = useState<FormData>(EMPTY_FORM);
-
   const [errors, setErrors] = useState<Partial<FormData>>({});
 
   const set = (key: keyof FormData, value: string) => {
@@ -95,11 +94,9 @@ const ChangeAction = ({
         date: expense.date,
         description: expense.description,
       });
-    } else {
-      setForm(EMPTY_FORM);
     }
     setErrors({});
-  }, [expense, isOpen]);
+  }, [expense]);
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
@@ -124,7 +121,6 @@ const ChangeAction = ({
             )}
           </div>
 
-          {/* Category + Amount */}
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1">
               <label className="text-xs font-medium text-gray-400 uppercase tracking-wide">
@@ -162,7 +158,6 @@ const ChangeAction = ({
             </div>
           </div>
 
-          {/* Date + Description */}
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1">
               <label className="text-xs font-medium text-gray-400 uppercase tracking-wide">
