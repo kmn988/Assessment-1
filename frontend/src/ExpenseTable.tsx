@@ -95,10 +95,7 @@ const ExpenseTable = () => {
   };
 
   const handleEdit = async (form: Omit<Expense, "id">) => {
-    const updatedExpense: Expense = await axiosInstance.put(
-      `/expense/${selectedExpense?.id}`,
-      form,
-    );
+    await axiosInstance.put(`/expense/${selectedExpense?.id}`, form);
     setExpenses((prev) =>
       prev.map((item) =>
         item.id === selectedExpense?.id ? { ...form, id: item.id } : item,
@@ -123,7 +120,7 @@ const ExpenseTable = () => {
       .then((res) => {
         setExpenses(res.data);
       });
-  }, []);
+  }, [period]);
 
   return (
     <div className="w-full ">

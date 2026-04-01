@@ -102,17 +102,15 @@ async def db_delete_expense(session: Session, expense_id: uuid.UUID) -> bool:
 
 async def db_get_trends(year: int, session: Session):
     data = {}
-    statement = select(Expense).where(Expense.date.contains(str(year)))
     for i in range(1, 13):
         query_month = str(i).zfill(2)
-        statement = statement.where(
+        statement = select(Expense).where(
             Expense.date.contains(str(year) + "-" + str(query_month))
         )
         total = session.exec(statement).all()
         total_expense = 0
         for item in total:
-            print(item, "item")
-            total_expense += item.amount
+            total_expense += int(item.amount)
         data[(str(year) + "-" + str(query_month))] = total_expense
 
     return data
