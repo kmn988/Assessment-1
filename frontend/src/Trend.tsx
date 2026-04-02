@@ -14,6 +14,7 @@ import type { Expense } from "./ExpenseTable";
 import BarChart from "./BarChart";
 import SummaryBox from "./Summary";
 import axiosInstance from "./config/axios";
+import YearSelector from "./YearSelector";
 
 ChartJS.register(
   CategoryScale,
@@ -48,6 +49,7 @@ type ChartType = "bar" | "line";
 
 const TrendChart = ({ tab }: TrendChartProps) => {
   const [expenses, setExpenses] = useState();
+  const [year, setYear] = useState(new Date().getFullYear());
 
   // const now = new Date();
   // const currentMonthData = expenses.filter((e) => {
@@ -66,20 +68,20 @@ const TrendChart = ({ tab }: TrendChartProps) => {
   // });
 
   useEffect(() => {
-    axiosInstance.get("/trends", { params: { year: 2026 } }).then((res) => {
+    axiosInstance.get("/trends", { params: { year } }).then((res) => {
       setExpenses(res.data);
     });
-  }, []);
+  }, [year]);
 
   return (
     <div className="flex flex-col gap-4 w-full m-7">
       {/* <SummaryBox data={currentMonthData} prevData={prevMonthData} /> */}
+      <YearSelector value={year} onChange={setYear} />
       {expenses && (
         <div style={{ position: "relative", height: 240 }}>
           <BarChart data={expenses} />
         </div>
       )}
-
       {/* Summary row */}
       {/* <div className="grid grid-cols-3 gap-3 pt-2 border-t border-gray-700">
         {[

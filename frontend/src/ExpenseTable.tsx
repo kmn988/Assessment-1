@@ -29,6 +29,7 @@ const ExpenseTable = () => {
     month: new Date().getMonth(),
     year: new Date().getFullYear(),
   });
+
   const [expenses, setExpenses] = useState<Expense[]>([
     {
       id: 1,
@@ -67,10 +68,14 @@ const ExpenseTable = () => {
   const buttons = ["All", "Food", "Exercise", "Entertainment", "Utilities"];
   const filtered = expenses.filter((item) => {
     const matchCategory = selected === "All" || item.category === selected;
+    const matchDate =
+      item.date.slice(0, 7) ===
+      `${period.year}-${(period.month + 1).toString().padStart(2, "0")}`;
+
     const matchSearch =
       item.title.toLowerCase().includes(search.toLowerCase()) ||
       item.category.toLowerCase().includes(search.toLowerCase());
-    return matchCategory && matchSearch;
+    return matchCategory && matchSearch && matchDate;
   });
   const total = expenses.reduce((acc, item) => acc + Number(item.amount), 0);
   const actionButtons = [
@@ -222,9 +227,9 @@ const ExpenseTable = () => {
             </div>
             <div className="col-span-1 flex flex-col w-full gap-7">
               <div className=" w-full h-75 ">
-                <DonutChart data={expenses} />
+                <DonutChart data={filtered} />
               </div>
-              <CategoryBreakdown data={expenses} />
+              <CategoryBreakdown data={filtered} />
             </div>
           </div>
         )}
