@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from sqlmodel import Field, SQLModel, Session, create_engine, select
 from typing import List, Optional
 import uuid
+import datetime
 
 
 # Establish a db connection
@@ -100,17 +101,17 @@ async def db_delete_expense(session: Session, expense_id: uuid.UUID) -> bool:
     return True
 
 
-async def db_get_trends(year: int, session: Session):
-    data = {}
-    for i in range(1, 13):
-        query_month = str(i).zfill(2)
+async def db_get_trends(year: int, session: Session) -> dict[str, int]:
+    yearly_expense_trends = {}
+    current_year = datetime.date.today().year
+    current_month = datetime.date.today().month
+    month_range = range(1, current_month + 1) if year == current_year else range(1, 13)
+    for month in month_range:
+        query_month = str(month).zfill(2)
         statement = select(Expense).where(
-            Expense.date.contains(str(year) + "-" + str(query_month))
+            Expense.date.contains(str(year) + "-" + query_month)
         )
-        total = session.exec(statement).all()
-        total_expense = 0
-        for item in total:
-            total_expense += int(item.amount)
-        data[(str(year) + "-" + str(query_month))] = total_expense
-
-    return data
+        total_expense = sum(int(item.amount) for item in session.exec(statement).all())
+        if total_expense > 0:
+            yearly_expense_trends[f"{year}-{query_month}"] = total_expense
+    return yearly_expense_trends

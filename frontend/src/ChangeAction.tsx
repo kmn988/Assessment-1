@@ -165,6 +165,7 @@ const ChangeAction = ({
               </label>
               <input
                 type="date"
+                max={new Date().toISOString().split("T")[0]}
                 value={form.date}
                 onChange={(e) => set("date", e.target.value)}
                 className="border border-gray-600 rounded-lg px-3 py-2 text-sm text-white bg-gray-700 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"

@@ -1,9 +1,9 @@
-import React from "react";
 import "chart.js/auto";
+import { Chart } from "chart.js/auto";
+import Annotation from "chartjs-plugin-annotation";
 import { Bar } from "react-chartjs-2";
-import type { ChartData } from "chart.js/auto";
-import type { Expense } from "./ExpenseTable";
 
+Chart.register(Annotation);
 const MONTHS = [
   "Jan",
   "Feb",
@@ -19,23 +19,13 @@ const MONTHS = [
   "Dec",
 ];
 
-const BarChart = ({ data }: any) => {
-  const monthlyTotals: number[] = [];
-  for (const [key, value] of Object.entries(data)) {
-    monthlyTotals.push(Number(value));
-  }
-
-  // Sort chronologically
-  // const sortedEntries = Object.entries(monthlyTotals).sort((a, b) => {
-  //   const toDate = (label: string) => {
-  //     const [mon, year] = label.split(" ");
-  //     return new Date(`${mon} 1, ${year}`).getTime();
-  //   };
-  //   return toDate(a[0]) - toDate(b[0]);
-  // });
-
-  // const labels = sortedEntries.map(([k]) => k);
-  // const amounts = sortedEntries.map(([, v]) => v);
+const BarChart = ({ year, data }: any) => {
+  const monthlyTotals: number[] = MONTHS.map((_, i) => {
+    const key = `${year}-${String(i + 1).padStart(2, "0")}`;
+    return data[key] ?? 0;
+  });
+  const average =
+    monthlyTotals.reduce((s, e) => s + e, 0) / Object.keys(data).length;
 
   const commonDataset = {
     label: "Monthly Spend",
@@ -58,6 +48,24 @@ const BarChart = ({ data }: any) => {
       },
     ],
   };
+
+  const annotation = {
+    type: "line" as const,
+    yMin: average,
+    yMax: average,
+    borderColor: "#ff5f6d",
+    borderWidth: 1.5,
+    label: {
+      display: true,
+      content: `Avg $${average.toFixed(2)}`,
+      position: "end" as const,
+      backgroundColor: "#ff5f6d",
+      color: "#fff",
+      padding: { x: 6, y: 3 },
+      borderRadius: 4,
+    },
+  };
+
   const options = {
     responsive: true,
     maintainAspectRatio: false,
@@ -72,6 +80,10 @@ const BarChart = ({ data }: any) => {
         bodyColor: "#e8eaf0",
         borderColor: "#2e3340",
         borderWidth: 1,
+      },
+      annotation: {
+        // drawTime: "afterDatasetsDraw",
+        annotations: { annotation },
       },
     },
     scales: {

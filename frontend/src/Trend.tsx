@@ -1,18 +1,15 @@
-import React, { useEffect, useState } from "react";
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
   BarElement,
+  CategoryScale,
+  Chart as ChartJS,
+  Legend,
+  LinearScale,
   LineElement,
   PointElement,
   Tooltip,
-  Legend,
 } from "chart.js";
-import { Bar, Line } from "react-chartjs-2";
-import type { Expense } from "./ExpenseTable";
+import { useEffect, useState } from "react";
 import BarChart from "./BarChart";
-import SummaryBox from "./Summary";
 import axiosInstance from "./config/axios";
 import YearSelector from "./YearSelector";
 
@@ -29,23 +26,6 @@ ChartJS.register(
 interface TrendChartProps {
   tab: number;
 }
-
-const MONTHS = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
-];
-
-type ChartType = "bar" | "line";
 
 const TrendChart = ({ tab }: TrendChartProps) => {
   const [expenses, setExpenses] = useState();
@@ -79,7 +59,7 @@ const TrendChart = ({ tab }: TrendChartProps) => {
       <YearSelector value={year} onChange={setYear} />
       {expenses && (
         <div style={{ position: "relative", height: 240 }}>
-          <BarChart data={expenses} />
+          <BarChart year={year} data={expenses} />
         </div>
       )}
       {/* Summary row */}
