@@ -9,11 +9,13 @@ from expense_tracker_crud import (
     get_session,
     Expense,
     FilterParams,
+    ExpenseByCategoryFilterParams,
     db_get_expenses,
     db_update_expense,
     db_create_expense,
     db_delete_expense,
     db_get_trends,
+    db_get_expense_by_category,
 )
 from fastapi_pagination import Page, add_pagination
 from fastapi_pagination.ext.sqlalchemy import paginate
@@ -88,6 +90,14 @@ async def delete_expense(expense_id: uuid.UUID, db: Session = Depends(get_sessio
 @app.get("/trends")
 async def get_trend(year: int, db: Session = Depends(get_session)):
     return await db_get_trends(year, db)
+
+
+@app.get("/expense_by_category")
+async def get_expense_by_category(
+    query: Annotated[ExpenseByCategoryFilterParams, Query()],
+    db: Session = Depends(get_session),
+):
+    return await db_get_expense_by_category(query, db)
 
 
 add_pagination(app)

@@ -50,6 +50,11 @@ class FilterParams(BaseModel):
     sort_dir: str = Field(None)
 
 
+class ExpenseByCategoryFilterParams(BaseModel):
+    month: int = Field(0, gt=0, le=100)
+    year: int = Field(0, ge=0)
+
+
 SORT_COLUMNS = {
     "title": Expense.title,
     "category": Expense.category,
@@ -102,7 +107,7 @@ async def db_get_expenses(session: Session, query: FilterParams) -> CustomPage[E
         query.sort_key,
         query.sort_dir,
     )
-    statement = select(Expense).offset(skip).limit(limit=20)
+    statement = select(Expense).offset(skip).limit(limit)
     if month != 0 and year != 0:
         query_month = str(month).zfill(2)
         statement = statement.where(
@@ -113,10 +118,13 @@ async def db_get_expenses(session: Session, query: FilterParams) -> CustomPage[E
     if search is not None:
         statement = statement.where(Expense.title.contains(search))
     sort_column = SORT_COLUMNS.get(sort_key, Expense.date)
-    if sort_dir == "desc":
-        statement = statement.order_by(desc(sort_column))
+    if sort_dir is not None:
+        if sort_dir == "desc":
+            statement = statement.order_by(desc(sort_column))
+        else:
+            statement = statement.order_by(asc(sort_column))
     else:
-        statement = statement.order_by(asc(sort_column))
+        statement = statement.order_by(desc(sort_column))
     return paginate(session, statement)
 
 
@@ -159,3 +167,17 @@ async def db_get_trends(year: int, session: Session) -> dict[str, int]:
         if total_expense > 0:
             yearly_expense_trends[f"{year}-{query_month}"] = total_expense
     return yearly_expense_trends
+
+
+async def db_get_expense_by_category(
+    query: ExpenseByCategoryFilterParams, session: Session
+) -> dict[str, int]:
+    date = str(query.year) + "-" + str(query.month).zfill(2)
+    expense_by_category = {}
+    statement = select(Expense).where(Expense.date.contains(date))
+    for item in session.exec(statement).all():
+        if item.category in expense_by_category:
+            expense_by_category[item.category] += float(item.amount)
+        else:
+            expense_by_category[item.category] = float(item.amount)
+    return expense_by_category

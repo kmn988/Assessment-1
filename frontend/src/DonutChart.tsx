@@ -10,7 +10,7 @@ import type {
 } from "chart.js/auto";
 import axiosInstance from "./config/axios";
 interface DonutChartProps {
-  data: Expense[];
+  data: Record<string, number>;
 }
 const COLORS = [
   "#fb923c",
@@ -23,13 +23,9 @@ const COLORS = [
   "#94a3b8",
 ];
 const DonutChart = ({ data }: DonutChartProps) => {
-  const categoryTotals = data.reduce<Record<string, number>>((acc, item) => {
-    acc[item.category] = (acc[item.category] || 0) + Number(item.amount);
-    return acc;
-  }, {});
-
-  const labels = Object.keys(categoryTotals);
-  const amounts = Object.values(categoryTotals);
+  const labels = Object.keys(data);
+  const amounts = Object.values(data);
+  console.log(amounts);
 
   const datasets: ChartDataset<"doughnut", string[]> = {
     label: "Expense",
@@ -53,7 +49,7 @@ const DonutChart = ({ data }: DonutChartProps) => {
       };
     },
   };
-  const options: ChartOptions<"doughnut"> = {
+  const options: any = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -74,7 +70,7 @@ const DonutChart = ({ data }: DonutChartProps) => {
       },
       tooltip: {
         callbacks: {
-          label: (ctx) => ` $${Number(ctx.raw).toFixed(2)}`,
+          label: (ctx: any) => ` $${Number(ctx.raw).toFixed(2)}`,
         },
         backgroundColor: "#1e2229",
         titleColor: "#e8eaf0",

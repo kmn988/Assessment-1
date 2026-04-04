@@ -2,7 +2,7 @@ import React from "react";
 import type { Expense } from "./ExpenseTable";
 
 interface CategoryBreakdownProps {
-  data: Expense[];
+  data: Record<string, number>;
 }
 
 const COLORS = [
@@ -17,12 +17,7 @@ const COLORS = [
 ];
 
 const CategoryBreakdown = ({ data }: CategoryBreakdownProps) => {
-  const categoryTotals = data.reduce<Record<string, number>>((acc, item) => {
-    acc[item.category] = (acc[item.category] || 0) + Number(item.amount);
-    return acc;
-  }, {});
-
-  const sorted = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1]);
+  const sorted = Object.entries(data).sort((a, b) => b[1] - a[1]);
   const total = sorted.reduce((s, [, v]) => s + v, 0);
 
   if (sorted.length === 0) {

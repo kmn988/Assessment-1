@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Modal from "./Modal";
-import type { Expense } from "./ExpenseTable";
+import { type Expense } from "./ExpenseTable";
+import { CATEGORIES } from "./value";
 
 interface ChangeActionProps {
   prevent: string;
@@ -16,12 +17,11 @@ interface FormData {
   date: string;
   description: string;
 }
-const CATEGORIES = ["Food", "Exercise", "Entertainment", "Utilities", "Other"];
 const EMPTY_FORM: FormData = {
   title: "",
   category: CATEGORIES[0],
   amount: 0,
-  date: "",
+  date: new Date().toISOString().split("T")[0],
   description: "",
 };
 

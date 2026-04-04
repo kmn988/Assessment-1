@@ -5,6 +5,7 @@ import DonutChart from "./DonutChart";
 import MonthSelector from "./MonthSelector";
 import CategoryBreakdown from "./CategoryBreakdown";
 import axiosInstance from "./config/axios";
+import CategorySelector from "./CategorySelector";
 export interface Expense {
   id: number;
   title: string;
@@ -12,10 +13,6 @@ export interface Expense {
   date: string;
   amount: number;
   description: string;
-}
-interface ExpenseTableProps {
-  data: Expense[];
-  setExpenses: React.Dispatch<React.SetStateAction<Expense[]>>;
 }
 const PAGE_SIZE = 10;
 type SortKey = keyof Pick<Expense, "title" | "category" | "date" | "amount">;
@@ -26,6 +23,7 @@ const COLS: { label: string; key: SortKey }[] = [
   { label: "Date", key: "date" },
   { label: "Amount", key: "amount" },
 ];
+
 const ExpenseTable = () => {
   const [selected, setSelected] = useState("All");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -42,8 +40,8 @@ const ExpenseTable = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
-  const buttons = ["All", "Food", "Exercise", "Entertainment", "Utilities"];
   const [sort, setSort] = useState<{ key: SortKey; dir: SortDir } | null>(null);
+  const [expenseByCategory, setExpenseByCategory] = useState({});
 
   const toggleSort = (key: SortKey) => {
     setSort((prev) =>
@@ -52,6 +50,7 @@ const ExpenseTable = () => {
         : { key, dir: "asc" },
     );
   };
+  console.log(expenseByCategory);
 
   const filtered = expenses.filter((item) => {
     const matchCategory = selected === "All" || item.category === selected;
@@ -85,9 +84,36 @@ const ExpenseTable = () => {
       },
     },
   ];
+  const fetchExpenses = async () => {
+    const response = await axiosInstance.get("/expenses", {
+      params: {
+        month: period.month + 1,
+        year: period.year,
+        page,
+        size: PAGE_SIZE,
+        ...(search && { search }),
+        ...(selected !== "All" && { category: selected }),
+        ...(sort && { sort_key: sort.key, sort_dir: sort.dir }),
+      },
+    });
+    setExpenses(response.data.items);
+    setTotalPages(response.data.pages);
+    setTotal(response.data.total);
+  };
+  const fetchExpenseByCategory = async () => {
+    const response = await axiosInstance.get("/expense_by_category", {
+      params: {
+        month: period.month + 1,
+        year: period.year,
+      },
+    });
+    setExpenseByCategory(response.data);
+  };
   const handleCreate = async (form: Omit<Expense, "id">) => {
     const expense: Expense = await axiosInstance.post("/expense/", form);
     setExpenses((prev) => [...prev, { ...form, id: expense.id }]);
+    fetchExpenses();
+    fetchExpenseByCategory();
   };
 
   const handleEdit = async (form: Omit<Expense, "id">) => {
@@ -97,6 +123,8 @@ const ExpenseTable = () => {
         item.id === selectedExpense?.id ? { ...form, id: item.id } : item,
       ),
     );
+    fetchExpenses();
+    fetchExpenseByCategory();
   };
   const handleDelete = () => {
     setExpenses((prev) =>
@@ -106,29 +134,16 @@ const ExpenseTable = () => {
   };
 
   useEffect(() => {
-    axiosInstance
-      .get("/expenses", {
-        params: {
-          month: period.month + 1,
-          year: period.year,
-          page,
-          size: PAGE_SIZE,
-          ...(search && { search }),
-          ...(selected !== "All" && { category: selected }),
-          ...(sort && { sort_key: sort.key, sort_dir: sort.dir }),
-        },
-      })
-      .then((res) => {
-        setExpenses(res.data.items);
-        setTotalPages(res.data.pages);
-        setTotal(res.data.total);
-      });
+    fetchExpenses();
   }, [period, sort, page, selected, search]);
 
   useEffect(() => {
     setPage(1);
   }, [period, selected]);
 
+  useEffect(() => {
+    fetchExpenseByCategory();
+  }, []);
   return (
     <div className="w-full ">
       <div className="flex justify-end m-4">
@@ -159,15 +174,7 @@ const ExpenseTable = () => {
             <div className="col-span-2 bg-gray-800 flex flex-col rounded-xl border-2 border-solid">
               <div className="flex p-4 h-auto justify-between items-center">
                 <div className="flex flex-wrap gap-2 ">
-                  {buttons.map((item) => (
-                    <div
-                      className={`px-2 border-solid border-2 rounded-full hover:cursor-pointer ${selected === item ? "border-main text-main" : ""}`}
-                      onClick={() => setSelected(item)}
-                      key={item}
-                    >
-                      {item}
-                    </div>
-                  ))}
+                  <CategorySelector value={selected} onChange={setSelected} />
                 </div>
                 <input
                   type="text"
@@ -306,9 +313,9 @@ const ExpenseTable = () => {
             </div>
             <div className="col-span-1 flex flex-col w-full gap-7">
               <div className=" w-full h-75 ">
-                <DonutChart data={filtered} />
+                <DonutChart data={expenseByCategory} />
               </div>
-              <CategoryBreakdown data={filtered} />
+              <CategoryBreakdown data={expenseByCategory} />
             </div>
           </div>
         )}
