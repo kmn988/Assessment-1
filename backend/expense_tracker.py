@@ -5,6 +5,7 @@ import uuid
 from pydantic import BaseModel, Field
 from sqlmodel import Session
 from expense_tracker_crud import (
+    CustomPage,
     get_session,
     Expense,
     FilterParams,
@@ -14,7 +15,10 @@ from expense_tracker_crud import (
     db_delete_expense,
     db_get_trends,
 )
-
+from fastapi_pagination import Page, add_pagination
+from fastapi_pagination.ext.sqlalchemy import paginate
+from fastapi_pagination.customization import CustomizedPage, UseParamsFields
+from typing import TypeVar
 
 app = FastAPI(title="Simple To-Do API")
 
@@ -39,7 +43,7 @@ app.add_middleware(
 # --- Endpoints ---
 
 
-@app.get("/expenses", response_model=List[Expense])
+@app.get("/expenses", response_model=CustomPage[Expense])
 async def get_all_expenses(
     query: Annotated[FilterParams, Query()],
     db: Session = Depends(get_session),
@@ -84,3 +88,6 @@ async def delete_expense(expense_id: uuid.UUID, db: Session = Depends(get_sessio
 @app.get("/trends")
 async def get_trend(year: int, db: Session = Depends(get_session)):
     return await db_get_trends(year, db)
+
+
+add_pagination(app)

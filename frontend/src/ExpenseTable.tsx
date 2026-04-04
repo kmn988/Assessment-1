@@ -123,7 +123,7 @@ const ExpenseTable = () => {
         },
       })
       .then((res) => {
-        setExpenses(res.data);
+        setExpenses(res.data.items);
       });
   }, [period]);
 

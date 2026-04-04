@@ -1,9 +1,14 @@
+from fastapi import Query
 from pydantic import BaseModel
 from sqlmodel import Field, SQLModel, Session, create_engine, select
 from typing import List, Optional
 import uuid
 import datetime
+from fastapi_pagination import Page
+from fastapi_pagination.ext.sqlalchemy import paginate
 
+from fastapi_pagination.customization import CustomizedPage, UseParamsFields
+from typing import TypeVar
 
 # Establish a db connection
 username = "root"
@@ -32,6 +37,14 @@ class FilterParams(BaseModel):
     category: str = Field(None)
 
 
+T = TypeVar("T")
+CustomPage = CustomizedPage[
+    Page[T],
+    UseParamsFields(
+        # change default size to be 5, increase upper limit to 1 000
+        size=Query(15, ge=1, le=1_000),
+    ),
+]
 # If the database and table already exist, it will do nothing to those existing tables
 SQLModel.metadata.create_all(engine)
 
@@ -59,7 +72,7 @@ async def db_get_expense(session: Session, expense_id: int) -> Optional[Expense]
 
 
 # # the get_all_Expenses endpoint calls this function to fetch multiple records (limited to 100 recrods per fetch)
-async def db_get_expenses(session: Session, query: FilterParams) -> List[Expense]:
+async def db_get_expenses(session: Session, query: FilterParams) -> CustomPage[Expense]:
     month, year, skip, limit, category = (
         query.month,
         query.year,
@@ -67,7 +80,7 @@ async def db_get_expenses(session: Session, query: FilterParams) -> List[Expense
         query.limit,
         query.category,
     )
-    statement = select(Expense).offset(skip).limit(limit)
+    statement = select(Expense).offset(skip).limit(limit=20)
     if month != 0 and year != 0:
         query_month = str(month).zfill(2)
         statement = statement.where(
@@ -75,7 +88,7 @@ async def db_get_expenses(session: Session, query: FilterParams) -> List[Expense
         )
     if category is not None:
         statement = statement.where(Expense.category == category)
-    return session.exec(statement).all()
+    return paginate(session, statement)
 
 
 # # the update_Expense endpoint calls this function to update a record
