@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import DeleteAction from "./DeleteAction";
 import ChangeAction from "./ChangeAction";
 import DonutChart from "./DonutChart";
@@ -10,14 +10,22 @@ export interface Expense {
   title: string;
   category: string;
   date: string;
-  amount: string;
+  amount: number;
   description: string;
 }
 interface ExpenseTableProps {
   data: Expense[];
   setExpenses: React.Dispatch<React.SetStateAction<Expense[]>>;
 }
-const PAGE_SIZE = 15;
+const PAGE_SIZE = 10;
+type SortKey = keyof Pick<Expense, "title" | "category" | "date" | "amount">;
+type SortDir = "asc" | "desc";
+const COLS: { label: string; key: SortKey }[] = [
+  { label: "Title / Description", key: "title" },
+  { label: "Category", key: "category" },
+  { label: "Date", key: "date" },
+  { label: "Amount", key: "amount" },
+];
 const ExpenseTable = () => {
   const [selected, setSelected] = useState("All");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -35,6 +43,15 @@ const ExpenseTable = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
   const buttons = ["All", "Food", "Exercise", "Entertainment", "Utilities"];
+  const [sort, setSort] = useState<{ key: SortKey; dir: SortDir } | null>(null);
+
+  const toggleSort = (key: SortKey) => {
+    setSort((prev) =>
+      prev?.key === key
+        ? { key, dir: prev.dir === "asc" ? "desc" : "asc" }
+        : { key, dir: "asc" },
+    );
+  };
 
   const filtered = expenses.filter((item) => {
     const matchCategory = selected === "All" || item.category === selected;
@@ -47,6 +64,7 @@ const ExpenseTable = () => {
       item.category.toLowerCase().includes(search.toLowerCase());
     return matchCategory && matchSearch && matchDate;
   });
+
   const totalExpense = expenses.reduce(
     (acc, item) => acc + Number(item.amount),
     0,
@@ -95,7 +113,9 @@ const ExpenseTable = () => {
           year: period.year,
           page,
           size: PAGE_SIZE,
+          ...(search && { search }),
           ...(selected !== "All" && { category: selected }),
+          ...(sort && { sort_key: sort.key, sort_dir: sort.dir }),
         },
       })
       .then((res) => {
@@ -103,7 +123,7 @@ const ExpenseTable = () => {
         setTotalPages(res.data.pages);
         setTotal(res.data.total);
       });
-  }, [period]);
+  }, [period, sort, page, selected, search]);
 
   useEffect(() => {
     setPage(1);
@@ -161,10 +181,24 @@ const ExpenseTable = () => {
                 <table className="w-full text-left ">
                   <thead>
                     <tr className="h-10 border-y-2 border-solid">
-                      <th className="p-3">Title / Description</th>
-                      <th className="p-3">Category</th>
-                      <th className="p-3">Date</th>
-                      <th className="p-3">Amount</th>
+                      {COLS.map((col) => (
+                        <th
+                          key={col.key}
+                          className="p-3 hover:cursor-pointer select-none hover:text-main transition-colors"
+                          onClick={() => toggleSort(col.key)}
+                        >
+                          <div className="flex items-center gap-1">
+                            {col.label}
+                            <span className="text-xs text-gray-500">
+                              {sort?.key === col.key
+                                ? sort.dir === "asc"
+                                  ? "▲"
+                                  : "▼"
+                                : "⇅"}
+                            </span>
+                          </div>
+                        </th>
+                      ))}
                     </tr>
                   </thead>
                   <tbody>

@@ -12,7 +12,7 @@ interface ChangeActionProps {
 interface FormData {
   title: string;
   category: string;
-  amount: string;
+  amount: number;
   date: string;
   description: string;
 }
@@ -20,7 +20,7 @@ const CATEGORIES = ["Food", "Exercise", "Entertainment", "Utilities", "Other"];
 const EMPTY_FORM: FormData = {
   title: "",
   category: CATEGORIES[0],
-  amount: "",
+  amount: 0,
   date: "",
   description: "",
 };
@@ -40,9 +40,9 @@ const ChangeAction = ({
     setErrors((e) => ({ ...e, [key]: "" }));
   };
   const validate = (): boolean => {
-    const newErrors: Partial<FormData> = {};
+    const newErrors: any = {};
     if (!form.title.trim()) newErrors.title = "Title is required";
-    if (!form.amount || isNaN(Number(form.amount)) || Number(form.amount) <= 0)
+    if (!form.amount || isNaN(form.amount) || form.amount <= 0)
       newErrors.amount = "Enter a valid amount";
     if (!form.date) newErrors.date = "Date is required";
     setErrors(newErrors);

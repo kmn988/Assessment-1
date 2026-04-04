@@ -1,7 +1,17 @@
 from fastapi import Query
 from pydantic import BaseModel
-from sqlmodel import Field, SQLModel, Session, create_engine, select, col
-from typing import List, Optional
+from sqlmodel import (
+    Field,
+    SQLModel,
+    Session,
+    create_engine,
+    select,
+    cast,
+    Float,
+    asc,
+    desc,
+)
+from typing import Optional
 import uuid
 import datetime
 from fastapi_pagination import Page
@@ -25,18 +35,27 @@ class Expense(SQLModel, table=True):
     title: str = Field(max_length=256)
     category: str = Field(max_length=256)
     date: str = Field(max_length=256)
-    amount: str = Field(max_length=256)
+    amount: float
     description: str | None = Field(max_length=256)
 
 
 class FilterParams(BaseModel):
     month: int = Field(0, gt=0, le=100)
     year: int = Field(0, ge=0)
-    skip: int = Field(0, ge=0)
-    limit: int = Field(100, ge=0)
+    skip: int = Field(None, ge=0)
+    limit: int = Field(None, ge=0)
     category: str = Field(None)
+    search: str = Field(None)
+    sort_key: str = Field(None)
+    sort_dir: str = Field(None)
 
 
+SORT_COLUMNS = {
+    "title": Expense.title,
+    "category": Expense.category,
+    "date": Expense.date,
+    "amount": cast(Expense.amount, Float),
+}
 T = TypeVar("T")
 CustomPage = CustomizedPage[
     Page[T],
@@ -73,16 +92,17 @@ async def db_get_expense(session: Session, expense_id: int) -> Optional[Expense]
 
 # # the get_all_Expenses endpoint calls this function to fetch multiple records (limited to 100 recrods per fetch)
 async def db_get_expenses(session: Session, query: FilterParams) -> CustomPage[Expense]:
-    month, year, skip, limit, category = (
+    month, year, skip, limit, category, search, sort_key, sort_dir = (
         query.month,
         query.year,
         query.skip,
         query.limit,
         query.category,
+        query.search,
+        query.sort_key,
+        query.sort_dir,
     )
-    statement = (
-        select(Expense).offset(skip).limit(limit=20).order_by(col(Expense.date).desc())
-    )
+    statement = select(Expense).offset(skip).limit(limit=20)
     if month != 0 and year != 0:
         query_month = str(month).zfill(2)
         statement = statement.where(
@@ -90,6 +110,13 @@ async def db_get_expenses(session: Session, query: FilterParams) -> CustomPage[E
         )
     if category is not None:
         statement = statement.where(Expense.category == category)
+    if search is not None:
+        statement = statement.where(Expense.title.contains(search))
+    sort_column = SORT_COLUMNS.get(sort_key, Expense.date)
+    if sort_dir == "desc":
+        statement = statement.order_by(desc(sort_column))
+    else:
+        statement = statement.order_by(asc(sort_column))
     return paginate(session, statement)
 
 
