@@ -43,11 +43,12 @@ const CategoryBreakdown = ({ data }: CategoryBreakdownProps) => {
         return (
           <div
             key={category}
-            className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-700 transition-colors cursor-default group"
+            className="flex items-center justify-between gap-3 px-4 py-3 rounded-lg hover:bg-gray-700 transition-colors cursor-default "
           >
             {/* Color dot */}
+            {/* <div className="flex items-center overflow-hidden gap-4"> */}
             <div
-              className="w-2.5 h-2.5 rounded-sm flex-shrink-0"
+              className="w-2.5 h-2.5 rounded-sm shrink-0"
               style={{ backgroundColor: color }}
             />
 
@@ -55,9 +56,10 @@ const CategoryBreakdown = ({ data }: CategoryBreakdownProps) => {
             <span className="text-sm text-gray-300 flex-1 truncate group-hover:text-white transition-colors">
               {category}
             </span>
+            {/* </div> */}
 
             {/* Bar */}
-            <div className="w-24 h-1.5 bg-gray-700 rounded-full overflow-hidden">
+            <div className="w-24 h-1.5 bg-gray-500 rounded-full overflow-hidden">
               <div
                 className="h-full rounded-full transition-all duration-500"
                 style={{ width: `${pct.toFixed(1)}%`, backgroundColor: color }}

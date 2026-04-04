@@ -17,7 +17,7 @@ interface ExpenseTableProps {
   data: Expense[];
   setExpenses: React.Dispatch<React.SetStateAction<Expense[]>>;
 }
-
+const PAGE_SIZE = 15;
 const ExpenseTable = () => {
   const [selected, setSelected] = useState("All");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -30,42 +30,12 @@ const ExpenseTable = () => {
     year: new Date().getFullYear(),
   });
 
-  const [expenses, setExpenses] = useState<Expense[]>([
-    {
-      id: 1,
-      title: "Run",
-      category: "Food",
-      date: "2022-01-01",
-      amount: "100",
-      description: "Run",
-    },
-    {
-      id: 2,
-      title: "Walk",
-      category: "Exercise",
-      date: "2022-01-01",
-      amount: "100",
-      description: "Walk",
-    },
-    {
-      id: 3,
-      title: "Watch",
-      category: "Entertainment",
-      date: "2022-01-01",
-      amount: "100",
-      description: "Watch",
-    },
-    {
-      id: 4,
-      title: "Flat",
-      category: "Utilities",
-      date: "2022-01-01",
-      amount: "100",
-      description: "Flat",
-    },
-  ]);
-
+  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
   const buttons = ["All", "Food", "Exercise", "Entertainment", "Utilities"];
+
   const filtered = expenses.filter((item) => {
     const matchCategory = selected === "All" || item.category === selected;
     const matchDate =
@@ -77,7 +47,10 @@ const ExpenseTable = () => {
       item.category.toLowerCase().includes(search.toLowerCase());
     return matchCategory && matchSearch && matchDate;
   });
-  const total = expenses.reduce((acc, item) => acc + Number(item.amount), 0);
+  const totalExpense = expenses.reduce(
+    (acc, item) => acc + Number(item.amount),
+    0,
+  );
   const actionButtons = [
     {
       title: "Edit",
@@ -120,12 +93,21 @@ const ExpenseTable = () => {
         params: {
           month: period.month + 1,
           year: period.year,
+          page,
+          size: PAGE_SIZE,
+          ...(selected !== "All" && { category: selected }),
         },
       })
       .then((res) => {
         setExpenses(res.data.items);
+        setTotalPages(res.data.pages);
+        setTotal(res.data.total);
       });
   }, [period]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [period, selected]);
 
   return (
     <div className="w-full ">
@@ -145,7 +127,7 @@ const ExpenseTable = () => {
         />
       </div>
       <div>
-        <div className="text-2xl font-bold">Total: ${total}</div>
+        <div className="text-2xl font-bold">Total: ${totalExpense}</div>
         <MonthSelector value={period} onChange={(value) => setPeriod(value)} />
         {expenses.length === 0 ? (
           <div className="mt-10">
@@ -154,8 +136,8 @@ const ExpenseTable = () => {
           </div>
         ) : (
           <div className="grid grid-cols-3 m-7 gap-7">
-            <div className="col-span-2 bg-gray-800 rounded-xl border-2 border-solid">
-              <div className="flex p-4 justify-between items-center">
+            <div className="col-span-2 bg-gray-800 flex flex-col rounded-xl border-2 border-solid">
+              <div className="flex p-4 h-auto justify-between items-center">
                 <div className="flex flex-wrap gap-2 ">
                   {buttons.map((item) => (
                     <div
@@ -175,55 +157,118 @@ const ExpenseTable = () => {
                   onChange={(e) => setSearch(e.target.value)}
                 />
               </div>
-              <table className="w-full text-left ">
-                <thead>
-                  <tr className="h-10 border-y-2 border-solid">
-                    <th className="p-3">Title / Description</th>
-                    <th className="p-3">Category</th>
-                    <th className="p-3">Date</th>
-                    <th className="p-3">Amount</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filtered.map((item) => (
-                    <tr className=" border-t-2 border-solid" key={item.id}>
-                      <td className="p-3">{item.title}</td>
-                      <td className="p-3">
-                        <div className="rounded-2xl border-2 border-solid w-fit px-2">
-                          {item.category}
-                        </div>
-                      </td>
-                      <td className="p-3">{item.date}</td>
-                      <td className="p-3 flex gap-x-2 ">
-                        <div>{item.amount}</div>
-                        {actionButtons.map((button) => (
-                          <div>
-                            <button
-                              className="border-solid border-2 rounded-full px-2 hover:cursor-pointer"
-                              onClick={() => button.action(item)}
-                              key={button.title}
-                            >
-                              {button.title}
-                            </button>
-                          </div>
-                        ))}
-                      </td>
+              <div className="flex flex-col h-full justify-between">
+                <table className="w-full text-left ">
+                  <thead>
+                    <tr className="h-10 border-y-2 border-solid">
+                      <th className="p-3">Title / Description</th>
+                      <th className="p-3">Category</th>
+                      <th className="p-3">Date</th>
+                      <th className="p-3">Amount</th>
                     </tr>
-                  ))}
-                  <ChangeAction
-                    prevent="Create"
-                    isOpen={showEditModal}
-                    onClose={() => setShowEditModal(false)}
-                    expense={selectedExpense}
-                    onSubmit={handleEdit}
-                  />
-                  <DeleteAction
-                    isOpen={showDeleteModal}
-                    onClose={() => setShowDeleteModal(false)}
-                    onConfirm={handleDelete}
-                  />
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {filtered.map((item) => (
+                      <tr className=" border-t-2 border-solid" key={item.id}>
+                        <td className="p-3">{item.title}</td>
+                        <td className="p-3">
+                          <div className="rounded-2xl border-2 border-solid w-fit px-2">
+                            {item.category}
+                          </div>
+                        </td>
+                        <td className="p-3">{item.date}</td>
+                        <td className="p-3 flex justify-between ">
+                          <div>{item.amount}</div>
+                          <div className="flex gap-2">
+                            {actionButtons.map((button) => (
+                              <div>
+                                <button
+                                  className="border-solid border-2 rounded-full px-2 hover:cursor-pointer"
+                                  onClick={() => button.action(item)}
+                                  key={button.title}
+                                >
+                                  {button.title}
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                    <ChangeAction
+                      prevent="Create"
+                      isOpen={showEditModal}
+                      onClose={() => setShowEditModal(false)}
+                      expense={selectedExpense}
+                      onSubmit={handleEdit}
+                    />
+                    <DeleteAction
+                      isOpen={showDeleteModal}
+                      onClose={() => setShowDeleteModal(false)}
+                      onConfirm={handleDelete}
+                    />
+                  </tbody>
+                </table>
+                <div className="flex items-center justify-between px-4 py-3 border-t-2 border-solid">
+                  <span className="text-xs text-gray-400">
+                    Page {page} of {totalPages} · {total} record
+                    {total !== 1 ? "s" : ""}
+                  </span>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setPage((p) => Math.max(1, p - 1))}
+                      disabled={page === 1}
+                      className="px-3 py-1.5 text-xs font-medium border border-gray-600 rounded-lg text-gray-300 hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    >
+                      ← Prev
+                    </button>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1)
+                      .filter(
+                        (p) =>
+                          p === 1 ||
+                          p === totalPages ||
+                          Math.abs(p - page) <= 1,
+                      )
+                      .reduce<(number | "...")[]>((acc, p, i, arr) => {
+                        if (i > 0 && p - (arr[i - 1] as number) > 1)
+                          acc.push("...");
+                        acc.push(p);
+                        return acc;
+                      }, [])
+                      .map((p, i) =>
+                        p === "..." ? (
+                          <span
+                            key={`ellipsis-${i}`}
+                            className="px-2 py-1.5 text-xs text-gray-500"
+                          >
+                            ...
+                          </span>
+                        ) : (
+                          <button
+                            key={p}
+                            onClick={() => setPage(p as number)}
+                            className={`px-3 py-1.5 text-xs font-medium border rounded-lg transition-colors ${
+                              page === p
+                                ? "bg-main text-black border-main"
+                                : "border-gray-600 text-gray-300 hover:bg-gray-700"
+                            }`}
+                          >
+                            {p}
+                          </button>
+                        ),
+                      )}
+                    <button
+                      onClick={() =>
+                        setPage((p) => Math.min(totalPages, p + 1))
+                      }
+                      disabled={page === totalPages}
+                      className="px-3 py-1.5 text-xs font-medium border border-gray-600 rounded-lg text-gray-300 hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    >
+                      Next →
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
             <div className="col-span-1 flex flex-col w-full gap-7">
               <div className=" w-full h-75 ">

@@ -1,6 +1,6 @@
 from fastapi import Query
 from pydantic import BaseModel
-from sqlmodel import Field, SQLModel, Session, create_engine, select
+from sqlmodel import Field, SQLModel, Session, create_engine, select, col
 from typing import List, Optional
 import uuid
 import datetime
@@ -42,7 +42,7 @@ CustomPage = CustomizedPage[
     Page[T],
     UseParamsFields(
         # change default size to be 5, increase upper limit to 1 000
-        size=Query(15, ge=1, le=1_000),
+        size=Query(10, ge=1, le=1_000),
     ),
 ]
 # If the database and table already exist, it will do nothing to those existing tables
@@ -80,7 +80,9 @@ async def db_get_expenses(session: Session, query: FilterParams) -> CustomPage[E
         query.limit,
         query.category,
     )
-    statement = select(Expense).offset(skip).limit(limit=20)
+    statement = (
+        select(Expense).offset(skip).limit(limit=20).order_by(col(Expense.date).desc())
+    )
     if month != 0 and year != 0:
         query_month = str(month).zfill(2)
         statement = statement.where(
@@ -124,7 +126,9 @@ async def db_get_trends(year: int, session: Session) -> dict[str, int]:
         statement = select(Expense).where(
             Expense.date.contains(str(year) + "-" + query_month)
         )
-        total_expense = sum(int(item.amount) for item in session.exec(statement).all())
+        total_expense = sum(
+            float(item.amount) for item in session.exec(statement).all()
+        )
         if total_expense > 0:
             yearly_expense_trends[f"{year}-{query_month}"] = total_expense
     return yearly_expense_trends
