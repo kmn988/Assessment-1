@@ -70,3 +70,7 @@ backend/
 ## Challenges Overcome
 
 Building this project involved several technical challenges that I resolved through research and experimentation. Column sorting and pagination required managing multiple states on the frontend and also handling query parameters on the backend. However, this challenge was fairly easy since the documentation for fastapi was plenty. I also had some challenge integrating Chart.js, since the documentation for react-chartjs was sparse, and I overcomed it through trial and error.
+
+## Link to github repository
+
+https://github.com/kmn988/Assessment-1
