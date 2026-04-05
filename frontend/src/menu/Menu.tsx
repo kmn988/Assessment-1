@@ -1,13 +1,12 @@
-import React from "react";
 interface MenuProps {
   setTab: (tab: number) => void;
   tab: number;
 }
 const Menu = ({ setTab, tab }: MenuProps) => {
-  const tabs = ["Menu", "Trend"];
+  const tabs = ["Logbook", "Trend"];
 
   return (
-    <div className="w-full md:w-1/6 md:max-w-50 bg-gray-800 flex flex-col md:gap-10">
+    <div className="w-full md:w-1/6 md:max-w-50 md:min-h-screen bg-gray-800 flex flex-col md:gap-10">
       <div className="text-xl md:text-2xl font-bold p-4">Expense Tracker</div>
       <div className="w-full text-xl bg-gray-800 hover:cursor-pointer flex md:flex-col overflow-x-auto ">
         {tabs.map((tabName, i) => (

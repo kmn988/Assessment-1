@@ -20,7 +20,7 @@ const Modal = ({ isOpen, onClose, children }: ModalProps) => {
 
   return ReactDOM.createPortal(
     <div
-      className="absolute z-100 inset-0 flex items-center justify-center bg-black/50 rounded-xl "
+      className="fixed z-100 inset-0 flex items-center justify-center bg-black/50 rounded-xl "
       style={{ animation: "fadeIn 0.5s ease" }}
       onClick={onClose}
     >

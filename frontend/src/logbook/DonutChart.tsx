@@ -1,31 +1,14 @@
-import React from "react";
-import { Doughnut } from "react-chartjs-2";
-import type { Expense } from "./ExpenseTable";
 import "chart.js/auto";
-import type {
-  ChartData,
-  ChartDataset,
-  ChartOptions,
-  Plugin,
-} from "chart.js/auto";
-import axiosInstance from "./config/axios";
+import type { ChartData, ChartDataset, Plugin } from "chart.js/auto";
+import { Doughnut } from "react-chartjs-2";
+import { COLORS } from "../config/value";
 interface DonutChartProps {
   data: Record<string, number>;
 }
-const COLORS = [
-  "#fb923c",
-  "#5b9cf6",
-  "#a78bfa",
-  "#f472b6",
-  "#34d399",
-  "#fbbf24",
-  "#60a5fa",
-  "#94a3b8",
-];
+
 const DonutChart = ({ data }: DonutChartProps) => {
   const labels = Object.keys(data);
   const amounts = Object.values(data);
-  console.log(amounts);
 
   const datasets: ChartDataset<"doughnut", string[]> = {
     label: "Expense",

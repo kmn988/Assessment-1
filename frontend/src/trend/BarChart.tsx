@@ -2,22 +2,9 @@ import "chart.js/auto";
 import { Chart } from "chart.js/auto";
 import Annotation from "chartjs-plugin-annotation";
 import { Bar } from "react-chartjs-2";
+import { MONTHS } from "../config/value";
 
 Chart.register(Annotation);
-const MONTHS = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
-];
 
 const BarChart = ({ year, data }: any) => {
   const monthlyTotals: number[] = MONTHS.map((_, i) => {

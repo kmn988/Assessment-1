@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import Modal from "./Modal";
+import Modal from "../Modal";
 import { type Expense } from "./ExpenseTable";
-import { CATEGORIES } from "./value";
+import { CATEGORIES } from "../config/value";
 
 interface ChangeActionProps {
   prevent: string;
@@ -47,8 +47,6 @@ const ChangeAction = ({
     if (!form.date) newErrors.date = "Date is required";
     if (form.description.length > 30)
       newErrors.description = "Max 30 characters";
-    console.log(form.description.length);
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };

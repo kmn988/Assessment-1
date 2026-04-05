@@ -1,19 +1,5 @@
-import React, { useState } from "react";
-
-const MONTHS = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
-];
+import { useState } from "react";
+import { MONTHS } from "../config/value";
 
 interface MonthSelectorProps {
   value: { month: number; year: number };

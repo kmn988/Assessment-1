@@ -1,18 +1,17 @@
 import { useState } from "react";
 import "./App.css";
-import ExpenseTable from "./ExpenseTable";
-import Menu from "./Menu";
-import TrendChart from "./Trend";
+import ExpenseTable from "./logbook/ExpenseTable";
+import Menu from "./menu/Menu";
+import TrendChart from "./trend/Trend";
 
 function App() {
   const [tab, setTab] = useState(0);
-  // const [expenses, dispatch, isPending] = useActionState<Expense[]>(fetchExpenses,[]);
 
   return (
-    <div className="flex flex-col md:flex-row w-full h-screen">
+    <div className="flex flex-col md:flex-row w-full">
       <Menu setTab={setTab} tab={tab} />
       {tab === 0 && <ExpenseTable />}
-      {tab === 1 && <TrendChart tab={tab} />}
+      {tab === 1 && <TrendChart />}
     </div>
   );
 }

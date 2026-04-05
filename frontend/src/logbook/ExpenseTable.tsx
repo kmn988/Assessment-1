@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
+import axiosInstance from "../config/axios";
+import { COLS, PAGE_SIZE, type SortDir, type SortKey } from "../config/value";
 import CategoryBreakdown from "./CategoryBreakdown";
 import CategorySelector from "./CategorySelector";
 import ChangeAction from "./ChangeAction";
-import axiosInstance from "./config/axios";
 import DeleteAction from "./DeleteAction";
 import DonutChart from "./DonutChart";
 import MonthSelector from "./MonthSelector";
@@ -14,15 +15,6 @@ export interface Expense {
   amount: number;
   description: string;
 }
-const PAGE_SIZE = 10;
-type SortKey = keyof Pick<Expense, "title" | "category" | "date" | "amount">;
-type SortDir = "asc" | "desc";
-const COLS: { label: string; key: SortKey }[] = [
-  { label: "Title / Description", key: "title" },
-  { label: "Category", key: "category" },
-  { label: "Date", key: "date" },
-  { label: "Amount", key: "amount" },
-];
 
 const ExpenseTable = () => {
   const [selected, setSelected] = useState("All");
@@ -50,7 +42,6 @@ const ExpenseTable = () => {
         : { key, dir: "asc" },
     );
   };
-  console.log(expenseByCategory);
 
   const filtered = expenses.filter((item) => {
     const matchCategory = selected === "All" || item.category === selected;
@@ -171,7 +162,7 @@ const ExpenseTable = () => {
       />
       <div>
         <MonthSelector value={period} onChange={(value) => setPeriod(value)} />
-        {expenses.length === 0 ? (
+        {expenses.length === 0 && selected === "All" ? (
           <div className="mt-10">
             <div>📋</div>
             <p>No expenses found for this period.</p>
@@ -179,7 +170,7 @@ const ExpenseTable = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 m-3 md:m-7 gap-4 md:gap-7">
             <div className="col-span-1 md:col-span-2 bg-gray-800 flex flex-col rounded-xl border-2 border-solid">
-              <div className="flex flex-col sm:flex-row p-4 h-auto gap-3 justify-between items-start sm:items-center">
+              <div className="flex flex-col sm:flex-row flex-wrap p-4 h-auto gap-3 justify-between items-start sm:items-center">
                 <div className="flex flex-wrap gap-2 ">
                   <CategorySelector value={selected} onChange={setSelected} />
                 </div>
@@ -218,7 +209,10 @@ const ExpenseTable = () => {
                     </thead>
                     <tbody>
                       {filtered.map((item) => (
-                        <tr className=" border-t-2 border-solid" key={item.id}>
+                        <tr
+                          className=" border-t-2 h-20 border-solid"
+                          key={item.id}
+                        >
                           <td className="p-3">
                             <div className=" flex flex-col justify-center gap-1">
                               <span>{item.title}</span>

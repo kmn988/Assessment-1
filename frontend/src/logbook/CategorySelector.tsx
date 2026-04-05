@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { CATEGORIES } from "./value";
+import { CATEGORIES } from "../config/value";
 
 interface CategorySelectorProps {
   value: string;
@@ -8,7 +8,7 @@ interface CategorySelectorProps {
 
 const CategorySelector = ({ value, onChange }: CategorySelectorProps) => {
   const [isOpen, setIsOpen] = useState(false);
-
+  const options = ["All", ...CATEGORIES];
   return (
     <div className="relative w-fit ">
       {/* Trigger */}
@@ -16,7 +16,7 @@ const CategorySelector = ({ value, onChange }: CategorySelectorProps) => {
         onClick={() => setIsOpen((o) => !o)}
         className="flex w-[240px] items-center justify-between px-4 py-2 text-sm font-medium bg-gray-800 border border-gray-600 rounded-lg hover:border-gray-400 transition-colors text-white"
       >
-        <span className="text-2xl">All</span>
+        <span className="text-2xl">{value}</span>
         <span
           className={`text-gray-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
         >
@@ -31,12 +31,12 @@ const CategorySelector = ({ value, onChange }: CategorySelectorProps) => {
           style={{ minWidth: 240 }}
         >
           <div className="grid grid-cols-1 gap-1 p-3">
-            {CATEGORIES.map((category, i) => (
+            {options.map((category, i) => (
               <button
                 key={category}
                 onClick={() => {
-                  setIsOpen(false);
                   onChange(category);
+                  setIsOpen(false);
                 }}
                 className={`
                   py-2 rounded-lg text-sm font-medium transition-colors

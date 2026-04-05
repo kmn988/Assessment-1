@@ -1,20 +1,8 @@
-import React from "react";
-import type { Expense } from "./ExpenseTable";
+import { COLORS } from "../config/value";
 
 interface CategoryBreakdownProps {
   data: Record<string, number>;
 }
-
-const COLORS = [
-  "#fb923c",
-  "#5b9cf6",
-  "#a78bfa",
-  "#f472b6",
-  "#34d399",
-  "#fbbf24",
-  "#60a5fa",
-  "#94a3b8",
-];
 
 const CategoryBreakdown = ({ data }: CategoryBreakdownProps) => {
   const sorted = Object.entries(data).sort((a, b) => b[1] - a[1]);
