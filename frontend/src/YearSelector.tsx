@@ -27,7 +27,7 @@ const YearSelector = ({ value, onChange }: YearSelectorProps) => {
         onClick={() => setIsOpen((o) => !o)}
         className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-gray-800 border border-gray-600 rounded-lg hover:border-gray-400 transition-colors text-white"
       >
-        <span>{value}</span>
+        <span className="text-lg md:text-2xl">{value}</span>
         <span
           className={`text-gray-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
         >
@@ -66,13 +66,16 @@ const YearSelector = ({ value, onChange }: YearSelectorProps) => {
               <button
                 key={year}
                 onClick={() => handleSelect(year)}
+                disabled={year > currentYear || year == value}
                 className={`py-2 rounded-lg text-sm font-medium transition-colors
                   ${
                     value === year
                       ? "bg-[#c8f03c] text-black"
                       : year === currentYear
                         ? "border border-gray-500 text-white hover:bg-gray-700"
-                        : "text-gray-300 hover:bg-gray-700 hover:text-white"
+                        : year > currentYear
+                          ? "text-gray-600 "
+                          : "text-gray-300 hover:bg-gray-700 hover:text-white"
                   }`}
               >
                 {year}

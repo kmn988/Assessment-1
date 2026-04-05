@@ -54,11 +54,12 @@ const TrendChart = ({ tab }: TrendChartProps) => {
   }, [year]);
 
   return (
-    <div className="flex flex-col gap-4 w-full m-7">
+    <div className="flex flex-col gap-10 w-full m-3 md:my-4 md:mx-7">
+      <div className="text-2xl font-bold">Your monthly trend</div>
       {/* <SummaryBox data={currentMonthData} prevData={prevMonthData} /> */}
       <YearSelector value={year} onChange={setYear} />
       {expenses && (
-        <div style={{ position: "relative", height: 240 }}>
+        <div style={{ position: "relative", height: 400 }}>
           <BarChart year={year} data={expenses} />
         </div>
       )}

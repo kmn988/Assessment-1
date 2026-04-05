@@ -36,15 +36,24 @@ const MonthSelector = ({ value, onChange }: MonthSelectorProps) => {
     const now = new Date();
     return month === now.getMonth() && viewYear === now.getFullYear();
   };
+  const isFutureMonth = (month: number) => {
+    if (viewYear > new Date().getFullYear()) {
+      return true;
+    } else if (viewYear === new Date().getFullYear()) {
+      return month >= new Date().getMonth();
+    } else {
+      return false;
+    }
+  };
 
   return (
     <div className="relative w-fit m-7">
       {/* Trigger */}
       <button
         onClick={() => setIsOpen((o) => !o)}
-        className="flex w-[240px] items-center justify-between px-4 py-2 text-sm font-medium bg-gray-800 border border-gray-600 rounded-lg hover:border-gray-400 transition-colors text-white"
+        className="flex w-[180px] md:w-[240px] items-center justify-between px-4 py-2 text-sm font-medium bg-gray-800 border border-gray-600 rounded-lg hover:border-gray-400 transition-colors text-white"
       >
-        <span className="text-2xl">
+        <span className="text-lg md:text-2xl">
           {MONTHS[value.month]} {value.year}
         </span>
         <span
@@ -83,6 +92,7 @@ const MonthSelector = ({ value, onChange }: MonthSelectorProps) => {
               <button
                 key={month}
                 onClick={() => handleSelect(i)}
+                disabled={isCurrentMonth(i) || isFutureMonth(i)}
                 className={`
                   py-2 rounded-lg text-sm font-medium transition-colors
                   ${
@@ -90,7 +100,9 @@ const MonthSelector = ({ value, onChange }: MonthSelectorProps) => {
                       ? "bg-[#c8f03c] text-black"
                       : isCurrentMonth(i)
                         ? "border border-gray-500 text-white hover:bg-gray-700"
-                        : "text-gray-300 hover:bg-gray-700 hover:text-white"
+                        : isFutureMonth(i)
+                          ? "text-gray-500"
+                          : "text-gray-300 hover:bg-gray-700 hover:text-white hover:cursor-pointer"
                   }
                 `}
               >

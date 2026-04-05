@@ -1,12 +1,19 @@
 import React from "react";
 import Modal from "./Modal";
+import type { Expense } from "./ExpenseTable";
 
 interface DeleteActionProps {
   isOpen: boolean;
   onClose: () => void;
+  expense: Expense | null;
   onConfirm: () => void;
 }
-const DeleteAction = ({ isOpen, onClose, onConfirm }: DeleteActionProps) => {
+const DeleteAction = ({
+  isOpen,
+  onClose,
+  expense,
+  onConfirm,
+}: DeleteActionProps) => {
   const actions = [
     {
       name: "Cancel",
@@ -17,7 +24,10 @@ const DeleteAction = ({ isOpen, onClose, onConfirm }: DeleteActionProps) => {
     },
     {
       name: "Delete",
-      onClick: onConfirm,
+      onClick: () => {
+        onConfirm();
+        onClose();
+      },
       color: "bg-red-500",
       hover: "hover:bg-red-600",
       border: "border-red-500",
@@ -26,7 +36,9 @@ const DeleteAction = ({ isOpen, onClose, onConfirm }: DeleteActionProps) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className="flex flex-col gap-4">
-        <p className="font-bold text-center">Delete Expense?</p>
+        <p className="font-bold text-center">
+          Delete {expense?.title} Expense?
+        </p>
         <p className="text-center">
           Are you sure you want to delete this expense?
         </p>

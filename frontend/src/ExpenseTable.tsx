@@ -1,11 +1,11 @@
-import React, { useEffect, useMemo, useState } from "react";
-import DeleteAction from "./DeleteAction";
+import { useEffect, useState } from "react";
+import CategoryBreakdown from "./CategoryBreakdown";
+import CategorySelector from "./CategorySelector";
 import ChangeAction from "./ChangeAction";
+import axiosInstance from "./config/axios";
+import DeleteAction from "./DeleteAction";
 import DonutChart from "./DonutChart";
 import MonthSelector from "./MonthSelector";
-import CategoryBreakdown from "./CategoryBreakdown";
-import axiosInstance from "./config/axios";
-import CategorySelector from "./CategorySelector";
 export interface Expense {
   id: number;
   title: string;
@@ -111,26 +111,28 @@ const ExpenseTable = () => {
   };
   const handleCreate = async (form: Omit<Expense, "id">) => {
     const expense: Expense = await axiosInstance.post("/expense/", form);
-    setExpenses((prev) => [...prev, { ...form, id: expense.id }]);
+    // setExpenses((prev) => [...prev, { ...form, id: expense.id }]);
     fetchExpenses();
     fetchExpenseByCategory();
   };
 
   const handleEdit = async (form: Omit<Expense, "id">) => {
     await axiosInstance.put(`/expense/${selectedExpense?.id}`, form);
-    setExpenses((prev) =>
-      prev.map((item) =>
-        item.id === selectedExpense?.id ? { ...form, id: item.id } : item,
-      ),
-    );
+    // setExpenses((prev) =>
+    //   prev.map((item) =>
+    //     item.id === selectedExpense?.id ? { ...form, id: item.id } : item,
+    //   ),
+    // );
     fetchExpenses();
     fetchExpenseByCategory();
   };
   const handleDelete = () => {
-    setExpenses((prev) =>
-      prev.filter((item) => item.id !== selectedExpense?.id),
-    );
-    setShowDeleteModal(false);
+    axiosInstance.delete(`/expense/${selectedExpense?.id}`);
+    // setExpenses((prev) =>
+    //   prev.filter((item) => item.id !== selectedExpense?.id),
+    // );
+    fetchExpenses();
+    fetchExpenseByCategory();
   };
 
   useEffect(() => {
@@ -143,26 +145,31 @@ const ExpenseTable = () => {
 
   useEffect(() => {
     fetchExpenseByCategory();
-  }, []);
+  }, [period]);
   return (
     <div className="w-full ">
-      <div className="flex justify-end m-4">
-        <button
-          className={`border-solid border-2 p-2 px-6 rounded-2xl hover:cursor-pointer bg-main hover:bg-hover text-black `}
-          onClick={() => setShowCreateModal(true)}
-        >
-          + Add expense
-        </button>
-        <ChangeAction
-          prevent="Edit"
-          isOpen={showCreateModal}
-          onClose={() => setShowCreateModal(false)}
-          expense={null}
-          onSubmit={handleCreate}
-        />
+      <div className="flex justify-between items-center px-4 my-4">
+        <div className="flex-1" /> {/* left spacer */}
+        <div className="text-2xl font-bold flex-1 text-center">
+          Total: ${totalExpense.toFixed(2)}
+        </div>
+        <div className="flex-1 flex justify-end">
+          <button
+            className="border-solid border-2 p-2 px-6 rounded-2xl hover:cursor-pointer bg-main hover:bg-hover text-black"
+            onClick={() => setShowCreateModal(true)}
+          >
+            + Add expense
+          </button>
+        </div>
       </div>
+      <ChangeAction
+        prevent="Edit"
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        expense={null}
+        onSubmit={handleCreate}
+      />
       <div>
-        <div className="text-2xl font-bold">Total: ${totalExpense}</div>
         <MonthSelector value={period} onChange={(value) => setPeriod(value)} />
         {expenses.length === 0 ? (
           <div className="mt-10">
@@ -170,9 +177,9 @@ const ExpenseTable = () => {
             <p>No expenses found for this period.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-3 m-7 gap-7">
-            <div className="col-span-2 bg-gray-800 flex flex-col rounded-xl border-2 border-solid">
-              <div className="flex p-4 h-auto justify-between items-center">
+          <div className="grid grid-cols-1 md:grid-cols-3 m-3 md:m-7 gap-4 md:gap-7">
+            <div className="col-span-1 md:col-span-2 bg-gray-800 flex flex-col rounded-xl border-2 border-solid">
+              <div className="flex flex-col sm:flex-row p-4 h-auto gap-3 justify-between items-start sm:items-center">
                 <div className="flex flex-wrap gap-2 ">
                   <CategorySelector value={selected} onChange={setSelected} />
                 </div>
@@ -185,71 +192,85 @@ const ExpenseTable = () => {
                 />
               </div>
               <div className="flex flex-col h-full justify-between">
-                <table className="w-full text-left ">
-                  <thead>
-                    <tr className="h-10 border-y-2 border-solid">
-                      {COLS.map((col) => (
-                        <th
-                          key={col.key}
-                          className="p-3 hover:cursor-pointer select-none hover:text-main transition-colors"
-                          onClick={() => toggleSort(col.key)}
-                        >
-                          <div className="flex items-center gap-1">
-                            {col.label}
-                            <span className="text-xs text-gray-500">
-                              {sort?.key === col.key
-                                ? sort.dir === "asc"
-                                  ? "▲"
-                                  : "▼"
-                                : "⇅"}
-                            </span>
-                          </div>
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filtered.map((item) => (
-                      <tr className=" border-t-2 border-solid" key={item.id}>
-                        <td className="p-3">{item.title}</td>
-                        <td className="p-3">
-                          <div className="rounded-2xl border-2 border-solid w-fit px-2">
-                            {item.category}
-                          </div>
-                        </td>
-                        <td className="p-3">{item.date}</td>
-                        <td className="p-3 flex justify-between ">
-                          <div>{item.amount}</div>
-                          <div className="flex gap-2">
-                            {actionButtons.map((button) => (
-                              <div>
-                                <button
-                                  className="border-solid border-2 rounded-full px-2 hover:cursor-pointer"
-                                  onClick={() => button.action(item)}
-                                  key={button.title}
-                                >
-                                  {button.title}
-                                </button>
-                              </div>
-                            ))}
-                          </div>
-                        </td>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left min-w-[500px]">
+                    <thead>
+                      <tr className="h-10 border-y-2 border-solid">
+                        {COLS.map((col) => (
+                          <th
+                            key={col.key}
+                            className="p-3 hover:cursor-pointer select-none hover:text-main transition-colors"
+                            onClick={() => toggleSort(col.key)}
+                          >
+                            <div className="flex items-center gap-1">
+                              {col.label}
+                              <span className="text-xs text-gray-500">
+                                {sort?.key === col.key
+                                  ? sort.dir === "asc"
+                                    ? "▲"
+                                    : "▼"
+                                  : "⇅"}
+                              </span>
+                            </div>
+                          </th>
+                        ))}
                       </tr>
-                    ))}
-                    <ChangeAction
-                      prevent="Create"
-                      isOpen={showEditModal}
-                      onClose={() => setShowEditModal(false)}
-                      expense={selectedExpense}
-                      onSubmit={handleEdit}
-                    />
-                    <DeleteAction
-                      isOpen={showDeleteModal}
-                      onClose={() => setShowDeleteModal(false)}
-                      onConfirm={handleDelete}
-                    />
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {filtered.map((item) => (
+                        <tr className=" border-t-2 border-solid" key={item.id}>
+                          <td className="p-3">
+                            <div className=" flex flex-col justify-center gap-1">
+                              <span>{item.title}</span>
+                              {item.description && (
+                                <span className="text-sm text-gray-400">
+                                  {item.description}
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="p-3">
+                            <div className="rounded-2xl border-2 border-solid w-fit px-2">
+                              {item.category}
+                            </div>
+                          </td>
+                          <td className="p-3">{item.date}</td>
+                          <td className="p-3 ">
+                            <div className=" flex justify-between items-center">
+                              <div>{item.amount}</div>
+                              <div className="flex gap-2">
+                                {actionButtons.map((button) => (
+                                  <div>
+                                    <button
+                                      className="border-solid border-2 rounded-full px-2 hover:cursor-pointer"
+                                      onClick={() => button.action(item)}
+                                      key={button.title}
+                                    >
+                                      {button.title}
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                      <ChangeAction
+                        prevent="Create"
+                        isOpen={showEditModal}
+                        onClose={() => setShowEditModal(false)}
+                        expense={selectedExpense}
+                        onSubmit={handleEdit}
+                      />
+                      <DeleteAction
+                        isOpen={showDeleteModal}
+                        onClose={() => setShowDeleteModal(false)}
+                        expense={selectedExpense}
+                        onConfirm={handleDelete}
+                      />
+                    </tbody>
+                  </table>
+                </div>
                 <div className="flex items-center justify-between px-4 py-3 border-t-2 border-solid">
                   <span className="text-xs text-gray-400">
                     Page {page} of {totalPages} · {total} record

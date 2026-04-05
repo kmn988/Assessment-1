@@ -48,13 +48,13 @@ const CategoryBreakdown = ({ data }: CategoryBreakdownProps) => {
             />
 
             {/* Category name */}
-            <span className="text-sm text-gray-300 flex-1 truncate group-hover:text-white transition-colors">
+            <span className="text-sm text-gray-300 flex-1 text-left truncate group-hover:text-white transition-colors">
               {category}
             </span>
             {/* </div> */}
 
             {/* Bar */}
-            <div className="w-24 h-1.5 bg-gray-500 rounded-full overflow-hidden">
+            <div className="w-16 md:w-24 h-1.5 bg-gray-500 rounded-full overflow-hidden hidden sm:block">
               <div
                 className="h-full rounded-full transition-all duration-500"
                 style={{ width: `${pct.toFixed(1)}%`, backgroundColor: color }}
@@ -62,7 +62,7 @@ const CategoryBreakdown = ({ data }: CategoryBreakdownProps) => {
             </div>
 
             {/* Percentage */}
-            <span className="text-xs text-gray-400 w-8 text-right">
+            <span className="text-xs text-gray-400 w-8 text-right hidden sm:block">
               {pct.toFixed(0)}%
             </span>
 

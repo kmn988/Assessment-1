@@ -45,6 +45,10 @@ const ChangeAction = ({
     if (!form.amount || isNaN(form.amount) || form.amount <= 0)
       newErrors.amount = "Enter a valid amount";
     if (!form.date) newErrors.date = "Date is required";
+    if (form.description.length > 30)
+      newErrors.description = "Max 30 characters";
+    console.log(form.description.length);
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -63,7 +67,7 @@ const ChangeAction = ({
   const actions = [
     {
       name: "Cancel",
-      onClick: onClose,
+      onClick: handleClose,
       color: "bg-gray-500",
       hover: "hover:bg-gray-600",
       border: "border-gray-500",
@@ -99,7 +103,7 @@ const ChangeAction = ({
   }, [expense]);
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal isOpen={isOpen} onClose={handleClose}>
       <div className="flex flex-col gap-4">
         <p className="font-bold text-center">{`${prevent === "Create" ? "Edit" : "Create"} Expense?`}</p>
         <div>
@@ -185,6 +189,11 @@ const ChangeAction = ({
                 placeholder="Add a note…"
                 className="border border-gray-600 rounded-lg px-3 py-2 text-sm text-white bg-gray-700 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition placeholder-gray-500"
               />
+              {errors.description && (
+                <span className="text-xs text-red-400">
+                  {errors.description}
+                </span>
+              )}
             </div>
           </div>
         </div>

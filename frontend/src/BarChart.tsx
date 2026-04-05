@@ -25,7 +25,7 @@ const BarChart = ({ year, data }: any) => {
     return data[key] ?? 0;
   });
   const average =
-    monthlyTotals.reduce((s, e) => s + e, 0) / Object.keys(data).length;
+    monthlyTotals.reduce((s, e) => s + e, 0) / (Object.keys(data).length || 12);
 
   const commonDataset = {
     label: "Monthly Spend",

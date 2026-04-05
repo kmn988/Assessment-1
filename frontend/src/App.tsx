@@ -9,7 +9,7 @@ function App() {
   // const [expenses, dispatch, isPending] = useActionState<Expense[]>(fetchExpenses,[]);
 
   return (
-    <div className="flex w-full h-screen">
+    <div className="flex flex-col md:flex-row w-full h-screen">
       <Menu setTab={setTab} tab={tab} />
       {tab === 0 && <ExpenseTable />}
       {tab === 1 && <TrendChart tab={tab} />}
