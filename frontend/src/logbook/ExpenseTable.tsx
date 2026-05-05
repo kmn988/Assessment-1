@@ -117,8 +117,8 @@ const ExpenseTable = () => {
     fetchExpenses();
     fetchExpenseByCategory();
   };
-  const handleDelete = () => {
-    axiosInstance.delete(`/expense/${selectedExpense?.id}`);
+  const handleDelete = async () => {
+    await axiosInstance.delete(`/expense/${selectedExpense?.id}`);
     // setExpenses((prev) =>
     //   prev.filter((item) => item.id !== selectedExpense?.id),
     // );
@@ -162,178 +162,174 @@ const ExpenseTable = () => {
       />
       <div>
         <MonthSelector value={period} onChange={(value) => setPeriod(value)} />
-        {expenses.length === 0 && selected === "All" ? (
+        {/* {expenses.length === 0 && selected === "All" ? (
           <div className="mt-10">
             <div>📋</div>
             <p>No expenses found for this period.</p>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 m-3 md:m-7 gap-4 md:gap-7">
-            <div className="col-span-1 md:col-span-2 bg-gray-800 flex flex-col rounded-xl border-2 border-solid">
-              <div className="flex flex-col sm:flex-row flex-wrap p-4 h-auto gap-3 justify-between items-start sm:items-center">
-                <div className="flex flex-wrap gap-2 ">
-                  <CategorySelector value={selected} onChange={setSelected} />
-                </div>
-                <input
-                  type="text"
-                  placeholder="Search expenses"
-                  className="px-2 border-solid border-2 rounded-2xl h-fit"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
+        ) : ( */}
+        <div className="grid grid-cols-1 md:grid-cols-3 m-3 md:m-7 gap-4 md:gap-7">
+          <div className="col-span-1 md:col-span-2 bg-gray-800 flex flex-col rounded-xl border-2 border-solid">
+            <div className="flex flex-col sm:flex-row flex-wrap p-4 h-auto gap-3 justify-between items-start sm:items-center">
+              <div className="flex flex-wrap gap-2 ">
+                <CategorySelector value={selected} onChange={setSelected} />
               </div>
-              <div className="flex flex-col h-full justify-between">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left min-w-[500px]">
-                    <thead>
-                      <tr className="h-10 border-y-2 border-solid">
-                        {COLS.map((col) => (
-                          <th
-                            key={col.key}
-                            className="p-3 hover:cursor-pointer select-none hover:text-main transition-colors"
-                            onClick={() => toggleSort(col.key)}
-                          >
-                            <div className="flex items-center gap-1">
-                              {col.label}
-                              <span className="text-xs text-gray-500">
-                                {sort?.key === col.key
-                                  ? sort.dir === "asc"
-                                    ? "▲"
-                                    : "▼"
-                                  : "⇅"}
-                              </span>
-                            </div>
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filtered.map((item) => (
-                        <tr
-                          className=" border-t-2 h-20 border-solid"
-                          key={item.id}
-                        >
-                          <td className="p-3">
-                            <div className=" flex flex-col justify-center gap-1">
-                              <span>{item.title}</span>
-                              {item.description && (
-                                <span className="text-sm text-gray-400">
-                                  {item.description}
-                                </span>
-                              )}
-                            </div>
-                          </td>
-                          <td className="p-3">
-                            <div className="rounded-2xl border-2 border-solid w-fit px-2">
-                              {item.category}
-                            </div>
-                          </td>
-                          <td className="p-3">{item.date}</td>
-                          <td className="p-3 ">
-                            <div className=" flex justify-between items-center">
-                              <div>{item.amount}</div>
-                              <div className="flex gap-2">
-                                {actionButtons.map((button) => (
-                                  <div>
-                                    <button
-                                      className="border-solid border-2 rounded-full px-2 hover:cursor-pointer"
-                                      onClick={() => button.action(item)}
-                                      key={button.title}
-                                    >
-                                      {button.title}
-                                    </button>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                      <ChangeAction
-                        prevent="Create"
-                        isOpen={showEditModal}
-                        onClose={() => setShowEditModal(false)}
-                        expense={selectedExpense}
-                        onSubmit={handleEdit}
-                      />
-                      <DeleteAction
-                        isOpen={showDeleteModal}
-                        onClose={() => setShowDeleteModal(false)}
-                        expense={selectedExpense}
-                        onConfirm={handleDelete}
-                      />
-                    </tbody>
-                  </table>
-                </div>
-                <div className="flex items-center justify-between px-4 py-3 border-t-2 border-solid">
-                  <span className="text-xs text-gray-400">
-                    Page {page} of {totalPages} · {total} record
-                    {total !== 1 ? "s" : ""}
-                  </span>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => setPage((p) => Math.max(1, p - 1))}
-                      disabled={page === 1}
-                      className="px-3 py-1.5 text-xs font-medium border border-gray-600 rounded-lg text-gray-300 hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                    >
-                      ← Prev
-                    </button>
-                    {Array.from({ length: totalPages }, (_, i) => i + 1)
-                      .filter(
-                        (p) =>
-                          p === 1 ||
-                          p === totalPages ||
-                          Math.abs(p - page) <= 1,
-                      )
-                      .reduce<(number | "...")[]>((acc, p, i, arr) => {
-                        if (i > 0 && p - (arr[i - 1] as number) > 1)
-                          acc.push("...");
-                        acc.push(p);
-                        return acc;
-                      }, [])
-                      .map((p, i) =>
-                        p === "..." ? (
-                          <span
-                            key={`ellipsis-${i}`}
-                            className="px-2 py-1.5 text-xs text-gray-500"
-                          >
-                            ...
-                          </span>
-                        ) : (
-                          <button
-                            key={p}
-                            onClick={() => setPage(p as number)}
-                            className={`px-3 py-1.5 text-xs font-medium border rounded-lg transition-colors ${
-                              page === p
-                                ? "bg-main text-black border-main"
-                                : "border-gray-600 text-gray-300 hover:bg-gray-700"
-                            }`}
-                          >
-                            {p}
-                          </button>
-                        ),
-                      )}
-                    <button
-                      onClick={() =>
-                        setPage((p) => Math.min(totalPages, p + 1))
-                      }
-                      disabled={page === totalPages}
-                      className="px-3 py-1.5 text-xs font-medium border border-gray-600 rounded-lg text-gray-300 hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                    >
-                      Next →
-                    </button>
-                  </div>
-                </div>
-              </div>
+              <input
+                type="text"
+                placeholder="Search expenses"
+                className="px-2 border-solid border-2 rounded-2xl h-fit"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
             </div>
-            <div className="col-span-1 flex flex-col w-full gap-7">
-              <div className=" w-full h-75 ">
-                <DonutChart data={expenseByCategory} />
+            <div className="flex flex-col h-full justify-between">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left min-w-[500px]">
+                  <thead>
+                    <tr className="h-10 border-y-2 border-solid">
+                      {COLS.map((col) => (
+                        <th
+                          key={col.key}
+                          className="p-3 hover:cursor-pointer select-none hover:text-main transition-colors"
+                          onClick={() => toggleSort(col.key)}
+                        >
+                          <div className="flex items-center gap-1">
+                            {col.label}
+                            <span className="text-xs text-gray-500">
+                              {sort?.key === col.key
+                                ? sort.dir === "asc"
+                                  ? "▲"
+                                  : "▼"
+                                : "⇅"}
+                            </span>
+                          </div>
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filtered.map((item) => (
+                      <tr
+                        className=" border-t-2 h-20 border-solid"
+                        key={item.id}
+                      >
+                        <td className="p-3">
+                          <div className=" flex flex-col justify-center gap-1">
+                            <span>{item.title}</span>
+                            {item.description && (
+                              <span className="text-sm text-gray-400">
+                                {item.description}
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="p-3">
+                          <div className="rounded-2xl border-2 border-solid w-fit px-2">
+                            {item.category}
+                          </div>
+                        </td>
+                        <td className="p-3">{item.date}</td>
+                        <td className="p-3 ">
+                          <div className=" flex justify-between items-center">
+                            <div>{item.amount}</div>
+                            <div className="flex gap-2">
+                              {actionButtons.map((button) => (
+                                <div>
+                                  <button
+                                    className="border-solid border-2 rounded-full px-2 hover:cursor-pointer"
+                                    onClick={() => button.action(item)}
+                                    key={button.title}
+                                  >
+                                    {button.title}
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                    <ChangeAction
+                      prevent="Create"
+                      isOpen={showEditModal}
+                      onClose={() => setShowEditModal(false)}
+                      expense={selectedExpense}
+                      onSubmit={handleEdit}
+                    />
+                    <DeleteAction
+                      isOpen={showDeleteModal}
+                      onClose={() => setShowDeleteModal(false)}
+                      expense={selectedExpense}
+                      onConfirm={handleDelete}
+                    />
+                  </tbody>
+                </table>
               </div>
-              <CategoryBreakdown data={expenseByCategory} />
+              <div className="flex items-center justify-between px-4 py-3 border-t-2 border-solid">
+                <span className="text-xs text-gray-400">
+                  Page {page} of {totalPages} · {total} record
+                  {total !== 1 ? "s" : ""}
+                </span>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page === 1}
+                    className="px-3 py-1.5 text-xs font-medium border border-gray-600 rounded-lg text-gray-300 hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  >
+                    ← Prev
+                  </button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1)
+                    .filter(
+                      (p) =>
+                        p === 1 || p === totalPages || Math.abs(p - page) <= 1,
+                    )
+                    .reduce<(number | "...")[]>((acc, p, i, arr) => {
+                      if (i > 0 && p - (arr[i - 1] as number) > 1)
+                        acc.push("...");
+                      acc.push(p);
+                      return acc;
+                    }, [])
+                    .map((p, i) =>
+                      p === "..." ? (
+                        <span
+                          key={`ellipsis-${i}`}
+                          className="px-2 py-1.5 text-xs text-gray-500"
+                        >
+                          ...
+                        </span>
+                      ) : (
+                        <button
+                          key={p}
+                          onClick={() => setPage(p as number)}
+                          className={`px-3 py-1.5 text-xs font-medium border rounded-lg transition-colors ${
+                            page === p
+                              ? "bg-main text-black border-main"
+                              : "border-gray-600 text-gray-300 hover:bg-gray-700"
+                          }`}
+                        >
+                          {p}
+                        </button>
+                      ),
+                    )}
+                  <button
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={page === totalPages}
+                    className="px-3 py-1.5 text-xs font-medium border border-gray-600 rounded-lg text-gray-300 hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  >
+                    Next →
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
-        )}
+          <div className="col-span-1 flex flex-col w-full gap-7">
+            <div className=" w-full h-75 ">
+              <DonutChart data={expenseByCategory} />
+            </div>
+            <CategoryBreakdown data={expenseByCategory} />
+          </div>
+        </div>
+        {/* )} */}
       </div>
     </div>
   );
