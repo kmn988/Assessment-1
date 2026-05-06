@@ -1,6 +1,6 @@
 import React from "react";
 
-interface PaginationProps {
+export interface PaginationProps {
   page: number;
   setPage: React.Dispatch<React.SetStateAction<number>>;
   total: number;
