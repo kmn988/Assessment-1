@@ -1,30 +1,34 @@
-from fastapi import FastAPI, HTTPException, Depends, Response, status, Query
-from typing import List, Annotated, Literal
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-import uuid
-from pydantic import BaseModel, Field
-from sqlmodel import Session
+from dependencies import get_current_user, get_token_header
+from user_crud import Users, RegisterRequest, UserRole
 from expense_tracker_crud import (
-    CustomPage,
+    create_access_token,
+    get_password_hash,
     get_session,
-    Expense,
-    FilterParams,
-    ExpenseByCategoryFilterParams,
-    db_get_expenses,
-    db_update_expense,
-    db_create_expense,
-    db_delete_expense,
-    db_get_trends,
-    db_get_expense_by_category,
+    verify_password,
 )
 from fastapi_pagination import Page, add_pagination
 from fastapi_pagination.ext.sqlalchemy import paginate
 from fastapi_pagination.customization import CustomizedPage, UseParamsFields
 from typing import TypeVar
+from routes import expenses
+from routes import users
+from fastapi.security import (
+    APIKeyHeader,
+    OAuth2PasswordBearer,
+    OAuth2PasswordRequestForm,
+)
+from sqlmodel import Session, select
+from datetime import timedelta
 
-app = FastAPI(title="Simple To-Do API")
-
-
+header_scheme = APIKeyHeader(name="Bearer", auto_error=False)
+app = FastAPI(title="Simple To-Do API", dependencies=[Depends(header_scheme)])
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
+app.include_router(
+    expenses.router, tags=["expenses"], dependencies=[Depends(get_current_user)]
+)
+app.include_router(users.router, prefix="/users", tags=["users"])
 # Define the origins that are allowed to talk to your server
 origins = [
     "http://localhost:3000",  # Default React port
@@ -42,62 +46,35 @@ app.add_middleware(
     allow_headers=["*"],  # Allows all headers
 )
 
+
 # --- Endpoints ---
-
-
-@app.get("/expenses", response_model=CustomPage[Expense])
-async def get_all_expenses(
-    query: Annotated[FilterParams, Query()],
+@app.post("/login")
+async def login(
+    form_data: RegisterRequest,
     db: Session = Depends(get_session),
 ):
-    """Fetch the entire to-do list."""
-    return await db_get_expenses(db, query)
+    user = db.exec(select(Users).where(Users.email == form_data.email.lower())).first()
+
+    if not user or not verify_password(form_data.password, user.password):
+        raise HTTPException(status_code=401, detail="Incorrect email or password")
+
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"email": form_data.email, "role": user.role, "id": str(user.id)},
+        expires_delta=access_token_expires,
+    )
+    return {"access_token": access_token, "email": form_data.email, "role": user.role}
 
 
-@app.post("/expense", response_model=Expense)
-async def create_expense(expense: Expense, db: Session = Depends(get_session)):
-    """Add a new task to the list."""
-    db_expense = await db_create_expense(db, expense)
+@app.post("/register")
+async def register(body: RegisterRequest, db: Session = Depends(get_session)):
+    db_user = Users(
+        email=body.email, password=get_password_hash(body.password), role=UserRole.USER
+    )
+    db.add(db_user)
     db.commit()
-    db.refresh(db_expense)
-    return db_expense
-
-
-@app.put("/expense/{expense_id}", response_model=Expense)
-async def update_expense(
-    expense_id: uuid.UUID, updated_object: Expense, db: Session = Depends(get_session)
-):
-    """Update an existing task by its ID."""
-    db_expense = await db_update_expense(db, expense_id, updated_object)
-    if not db_expense:
-        raise HTTPException(status_code=404, detail="Expense item not found")
-    db.commit()
-    db.refresh(db_expense)
-    return db_expense
-
-
-@app.delete("/expense/{expense_id}")
-async def delete_expense(expense_id: uuid.UUID, db: Session = Depends(get_session)):
-    """Remove a task from the list."""
-    db_expense = await db_delete_expense(db, expense_id)
-    if not db_expense:
-        raise HTTPException(status_code=404, detail="Expense item not found")
-    db.commit()
-    # This code indicates the action was successful, the resource is gone, and no body content needs to be returned.
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
-
-
-@app.get("/trends")
-async def get_trend(year: int, db: Session = Depends(get_session)):
-    return await db_get_trends(year, db)
-
-
-@app.get("/expense_by_category")
-async def get_expense_by_category(
-    query: Annotated[ExpenseByCategoryFilterParams, Query()],
-    db: Session = Depends(get_session),
-):
-    return await db_get_expense_by_category(query, db)
+    db.refresh(db_user)
+    return db_user
 
 
 add_pagination(app)
