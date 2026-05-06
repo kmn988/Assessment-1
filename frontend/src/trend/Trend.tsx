@@ -12,6 +12,7 @@ import { useEffect, useState } from "react";
 import BarChart from "./BarChart";
 import axiosInstance from "../config/axios";
 import YearSelector from "./YearSelector";
+import { get_trend } from "../config/api";
 
 ChartJS.register(
   CategoryScale,
@@ -27,10 +28,12 @@ const TrendChart = () => {
   const [expenses, setExpenses] = useState();
   const [year, setYear] = useState(new Date().getFullYear());
 
+  const fetch_trends = async () => {
+    const trends = await get_trend({ year });
+    setExpenses(trends);
+  };
   useEffect(() => {
-    axiosInstance.get("/trends", { params: { year } }).then((res) => {
-      setExpenses(res.data);
-    });
+    fetch_trends();
   }, [year]);
 
   return (
