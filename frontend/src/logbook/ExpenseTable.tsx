@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
-import axiosInstance from "../config/axios";
+import Pagination from "../common/Pagination";
+import {
+  create_expense,
+  delete_expense_by_id,
+  get_expense_by_category,
+  get_expenses,
+  update_expense_by_id,
+} from "../config/api";
 import { COLS, PAGE_SIZE, type SortDir, type SortKey } from "../config/value";
 import CategoryBreakdown from "./CategoryBreakdown";
 import CategorySelector from "./CategorySelector";
@@ -7,6 +14,8 @@ import ChangeAction from "./ChangeAction";
 import DeleteAction from "./DeleteAction";
 import DonutChart from "./DonutChart";
 import MonthSelector from "./MonthSelector";
+import TableBase from "../common/TableBase";
+
 export interface Expense {
   id: number;
   title: string;
@@ -76,52 +85,39 @@ const ExpenseTable = () => {
     },
   ];
   const fetchExpenses = async () => {
-    const response = await axiosInstance.get("/expenses", {
-      params: {
-        month: period.month + 1,
-        year: period.year,
-        page,
-        size: PAGE_SIZE,
-        ...(search && { search }),
-        ...(selected !== "All" && { category: selected }),
-        ...(sort && { sort_key: sort.key, sort_dir: sort.dir }),
-      },
+    const response = await get_expenses({
+      month: period.month + 1,
+      year: period.year,
+      page,
+      size: PAGE_SIZE,
+      ...(search && { search }),
+      ...(selected !== "All" && { category: selected }),
+      ...(sort && { sort_key: sort.key, sort_dir: sort.dir }),
     });
-    setExpenses(response.data.items);
-    setTotalPages(response.data.pages);
-    setTotal(response.data.total);
+    setExpenses(response.items);
+    setTotalPages(response.pages);
+    setTotal(response.total);
   };
   const fetchExpenseByCategory = async () => {
-    const response = await axiosInstance.get("/expense_by_category", {
-      params: {
-        month: period.month + 1,
-        year: period.year,
-      },
+    const response = await get_expense_by_category({
+      month: period.month + 1,
+      year: period.year,
     });
-    setExpenseByCategory(response.data);
+    setExpenseByCategory(response);
   };
   const handleCreate = async (form: Omit<Expense, "id">) => {
-    const expense: Expense = await axiosInstance.post("/expense/", form);
-    // setExpenses((prev) => [...prev, { ...form, id: expense.id }]);
+    await create_expense(form);
     fetchExpenses();
     fetchExpenseByCategory();
   };
 
   const handleEdit = async (form: Omit<Expense, "id">) => {
-    await axiosInstance.put(`/expense/${selectedExpense?.id}`, form);
-    // setExpenses((prev) =>
-    //   prev.map((item) =>
-    //     item.id === selectedExpense?.id ? { ...form, id: item.id } : item,
-    //   ),
-    // );
+    await update_expense_by_id({ id: selectedExpense?.id, form });
     fetchExpenses();
     fetchExpenseByCategory();
   };
   const handleDelete = async () => {
-    await axiosInstance.delete(`/expense/${selectedExpense?.id}`);
-    // setExpenses((prev) =>
-    //   prev.filter((item) => item.id !== selectedExpense?.id),
-    // );
+    await delete_expense_by_id(selectedExpense?.id);
     fetchExpenses();
     fetchExpenseByCategory();
   };
@@ -137,6 +133,7 @@ const ExpenseTable = () => {
   useEffect(() => {
     fetchExpenseByCategory();
   }, [period]);
+
   return (
     <div className="w-full ">
       <div className="flex justify-between items-center px-4 my-4">
@@ -184,142 +181,91 @@ const ExpenseTable = () => {
             </div>
             <div className="flex flex-col h-full justify-between">
               <div className="overflow-x-auto">
-                <table className="w-full text-left min-w-[500px]">
-                  <thead>
-                    <tr className="h-10 border-y-2 border-solid">
-                      {COLS.map((col) => (
-                        <th
-                          key={col.key}
-                          className="p-3 hover:cursor-pointer select-none hover:text-main transition-colors"
-                          onClick={() => toggleSort(col.key)}
-                        >
-                          <div className="flex items-center gap-1">
-                            {col.label}
-                            <span className="text-xs text-gray-500">
-                              {sort?.key === col.key
-                                ? sort.dir === "asc"
-                                  ? "▲"
-                                  : "▼"
-                                : "⇅"}
-                            </span>
-                          </div>
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filtered.map((item) => (
-                      <tr
-                        className=" border-t-2 h-20 border-solid"
-                        key={item.id}
-                      >
-                        <td className="p-3">
-                          <div className=" flex flex-col justify-center gap-1">
-                            <span>{item.title}</span>
-                            {item.description && (
-                              <span className="text-sm text-gray-400">
-                                {item.description}
-                              </span>
-                            )}
-                          </div>
-                        </td>
-                        <td className="p-3">
-                          <div className="rounded-2xl border-2 border-solid w-fit px-2">
-                            {item.category}
-                          </div>
-                        </td>
-                        <td className="p-3">{item.date}</td>
-                        <td className="p-3 ">
-                          <div className=" flex justify-between items-center">
-                            <div>{item.amount}</div>
-                            <div className="flex gap-2">
-                              {actionButtons.map((button) => (
-                                <div>
-                                  <button
-                                    className="border-solid border-2 rounded-full px-2 hover:cursor-pointer"
-                                    onClick={() => button.action(item)}
-                                    key={button.title}
-                                  >
-                                    {button.title}
-                                  </button>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                    <ChangeAction
-                      prevent="Create"
-                      isOpen={showEditModal}
-                      onClose={() => setShowEditModal(false)}
-                      expense={selectedExpense}
-                      onSubmit={handleEdit}
-                    />
-                    <DeleteAction
-                      isOpen={showDeleteModal}
-                      onClose={() => setShowDeleteModal(false)}
-                      expense={selectedExpense}
-                      onConfirm={handleDelete}
-                    />
-                  </tbody>
-                </table>
-              </div>
-              <div className="flex items-center justify-between px-4 py-3 border-t-2 border-solid">
-                <span className="text-xs text-gray-400">
-                  Page {page} of {totalPages} · {total} record
-                  {total !== 1 ? "s" : ""}
-                </span>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
-                    disabled={page === 1}
-                    className="px-3 py-1.5 text-xs font-medium border border-gray-600 rounded-lg text-gray-300 hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                  >
-                    ← Prev
-                  </button>
-                  {Array.from({ length: totalPages }, (_, i) => i + 1)
-                    .filter(
-                      (p) =>
-                        p === 1 || p === totalPages || Math.abs(p - page) <= 1,
-                    )
-                    .reduce<(number | "...")[]>((acc, p, i, arr) => {
-                      if (i > 0 && p - (arr[i - 1] as number) > 1)
-                        acc.push("...");
-                      acc.push(p);
-                      return acc;
-                    }, [])
-                    .map((p, i) =>
-                      p === "..." ? (
-                        <span
-                          key={`ellipsis-${i}`}
-                          className="px-2 py-1.5 text-xs text-gray-500"
-                        >
-                          ...
+                <TableBase
+                  headerComponent={COLS.map((col) => (
+                    <th
+                      key={col.key}
+                      className="p-3 hover:cursor-pointer select-none hover:text-main transition-colors"
+                      onClick={() => toggleSort(col.key)}
+                    >
+                      <div className="flex items-center gap-1">
+                        {col.label}
+                        <span className="text-xs text-gray-500">
+                          {sort?.key === col.key
+                            ? sort.dir === "asc"
+                              ? "▲"
+                              : "▼"
+                            : "⇅"}
                         </span>
-                      ) : (
-                        <button
-                          key={p}
-                          onClick={() => setPage(p as number)}
-                          className={`px-3 py-1.5 text-xs font-medium border rounded-lg transition-colors ${
-                            page === p
-                              ? "bg-main text-black border-main"
-                              : "border-gray-600 text-gray-300 hover:bg-gray-700"
-                          }`}
+                      </div>
+                    </th>
+                  ))}
+                  bodyComponent={
+                    <>
+                      {filtered.map((item) => (
+                        <tr
+                          className=" border-t-2 h-20 border-solid"
+                          key={item.id}
                         >
-                          {p}
-                        </button>
-                      ),
-                    )}
-                  <button
-                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                    disabled={page === totalPages}
-                    className="px-3 py-1.5 text-xs font-medium border border-gray-600 rounded-lg text-gray-300 hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                  >
-                    Next →
-                  </button>
-                </div>
+                          <td className="p-3">
+                            <div className=" flex flex-col justify-center gap-1">
+                              <span>{item.title}</span>
+                              {item.description && (
+                                <span className="text-sm text-gray-400">
+                                  {item.description}
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="p-3">
+                            <div className="rounded-2xl border-2 border-solid w-fit px-2">
+                              {item.category}
+                            </div>
+                          </td>
+                          <td className="p-3">{item.date}</td>
+                          <td className="p-3 ">
+                            <div className=" flex justify-between items-center">
+                              <div>{item.amount}</div>
+                              <div className="flex gap-2">
+                                {actionButtons.map((button) => (
+                                  <div>
+                                    <button
+                                      className="border-solid border-2 rounded-full px-2 hover:cursor-pointer"
+                                      onClick={() => button.action(item)}
+                                      key={button.title}
+                                    >
+                                      {button.title}
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                      <ChangeAction
+                        prevent="Create"
+                        isOpen={showEditModal}
+                        onClose={() => setShowEditModal(false)}
+                        expense={selectedExpense}
+                        onSubmit={handleEdit}
+                      />
+                      <DeleteAction
+                        isOpen={showDeleteModal}
+                        onClose={() => setShowDeleteModal(false)}
+                        expense={selectedExpense}
+                        onConfirm={handleDelete}
+                      />
+                    </>
+                  }
+                />
               </div>
+              <Pagination
+                page={page}
+                setPage={setPage}
+                total={total}
+                totalPages={totalPages}
+              />
             </div>
           </div>
           <div className="col-span-1 flex flex-col w-full gap-7">
