@@ -71,6 +71,104 @@ backend/
 
 Building this project involved several technical challenges that I resolved through research and experimentation. Column sorting and pagination required managing multiple states on the frontend and also handling query parameters on the backend. However, this challenge was fairly easy since the documentation for fastapi was plenty. I also had some challenge integrating Chart.js, since the documentation for react-chartjs was sparse, and I overcomed it through trial and error.
 
+# Installation Guide
+
+## Prerequisites
+
+Make sure the following are installed on your machine before proceeding:
+
+- [Node.js](https://nodejs.org/) v18+
+- [Python](https://www.python.org/) 3.10+
+- [MySQL](https://www.mysql.com/) 8.0+
+- [Git](https://git-scm.com/)
+
+---
+
+## 1. Clone the Repository
+
+```bash
+git clone <your-repo-url>
+cd <your-repo-name>
+```
+
+## 2. Backend Setup
+
+Navigate to the backend folder:
+
+```bash
+cd backend
+```
+
+Create and activate a virtual environment:
+
+```bash
+# Windows
+python -m venv venv
+venv\Scripts\activate
+
+# macOS / Linux
+python -m venv venv
+source venv/bin/activate
+```
+
+Install dependencies:
+
+```bash
+pip install -r requirement.txt
+```
+
+Update database credentials in `expense_tracker_crud.py` if needed:
+
+```python
+username = "root"
+password = "your_password"
+database_name = "sys"
+```
+
+Start the backend server:
+
+```bash
+uvicorn expense_tracker:app --reload
+```
+
+The API will be available at `http://127.0.0.1:8000`. You can view the auto-generated docs at `http://127.0.0.1:8000/docs`.
+
+---
+
+## 3. Frontend Setup
+
+Open a new terminal and navigate to the frontend folder:
+
+```bash
+cd frontend
+```
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Start the development server:
+
+```bash
+npm run dev
+```
+
+The app will be available at `http://localhost:5173`.
+
+---
+
+## 4. Verify Everything is Running
+
+| Service     | URL                        |
+| ----------- | -------------------------- |
+| Frontend    | http://localhost:5173      |
+| Backend API | http://127.0.0.1:8000      |
+| API Docs    | http://127.0.0.1:8000/docs |
+
+---
+
 ## Link to github repository
 
 https://github.com/kmn988/Assessment-1
