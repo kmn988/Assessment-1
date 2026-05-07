@@ -1,5 +1,6 @@
 from fastapi import HTTPException, Depends, Response, status, Query, APIRouter
-from user_crud import UserDecoded
+from models.expense_model import ExpenseBase
+from models.user_model import UserDecoded
 from dependencies import get_current_user
 from expense_crud import (
     CustomPage,
@@ -34,7 +35,7 @@ async def get_all_expenses(
 
 @router.post("/expense", response_model=Expense)
 async def create_expense(
-    expense: Expense, user: CurrentUser, db: Session = Depends(get_session)
+    expense: ExpenseBase, user: CurrentUser, db: Session = Depends(get_session)
 ):
     """Add a new task to the list."""
     db_expense = await db_create_expense(db, user, expense)
@@ -46,7 +47,7 @@ async def create_expense(
 @router.put("/expense/{expense_id}", response_model=Expense)
 async def update_expense(
     expense_id: uuid.UUID,
-    updated_object: Expense,
+    updated_object: ExpenseBase,
     user: CurrentUser,
     db: Session = Depends(get_session),
 ):

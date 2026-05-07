@@ -1,70 +1,22 @@
-from fastapi import Query, HTTPException
-from pydantic import BaseModel
+from fastapi import HTTPException
 from sqlmodel import (
-    Field,
-    SQLModel,
     Session,
-    create_engine,
     select,
-    cast,
-    Float,
     asc,
     desc,
 )
 from typing import Optional
 import uuid
 import datetime
-from fastapi_pagination import Page
 from fastapi_pagination.ext.sqlalchemy import paginate
-
-from fastapi_pagination.customization import CustomizedPage, UseParamsFields
-from typing import TypeVar
-
-from user_crud import UserDecoded
-
-
-class Expense(SQLModel, table=True):
-    # Change the id field to str type becuase MySQL's int type cannot hold large numbers
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    user_id: uuid.UUID = Field(foreign_key="users.id", index=True)
-    title: str = Field(max_length=256)
-    category: str = Field(max_length=256)
-    date: str = Field(max_length=256)
-    amount: float
-    description: str | None = Field(max_length=256)
-
-
-class FilterParams(BaseModel):
-    month: int = Field(0, gt=0, le=100)
-    year: int = Field(0, ge=0)
-    skip: int = Field(None, ge=0)
-    limit: int = Field(None, ge=0)
-    category: str = Field(None)
-    search: str = Field(None)
-    sort_key: str = Field(None)
-    sort_dir: str = Field(None)
-
-
-class ExpenseByCategoryFilterParams(BaseModel):
-    month: int = Field(0, gt=0, le=100)
-    year: int = Field(0, ge=0)
-
-
-SORT_COLUMNS = {
-    "title": Expense.title,
-    "category": Expense.category,
-    "date": Expense.date,
-    "amount": cast(Expense.amount, Float),
-}
-
-T = TypeVar("T")
-CustomPage = CustomizedPage[
-    Page[T],
-    UseParamsFields(
-        # change default size to be 5, increase upper limit to 1 000
-        size=Query(10, ge=1, le=1_000),
-    ),
-]
+from models.expense_model import (
+    SORT_COLUMNS,
+    CustomPage,
+    Expense,
+    ExpenseByCategoryFilterParams,
+    FilterParams,
+)
+from models.user_model import UserDecoded
 
 
 async def db_create_expense(

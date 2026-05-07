@@ -1,8 +1,8 @@
-from fastapi import Depends, HTTPException, Header, Request
+from fastapi import HTTPException, Header, Request
 import jwt
 from dotenv import load_dotenv
 import os
-from user_crud import UserDecoded
+from models.user_model import UserDecoded
 
 load_dotenv()
 SECRET_KEY = os.getenv("SECRET_KEY")
@@ -23,3 +23,14 @@ def get_current_user(request: Request):
         )
     payload = jwt.decode(token, SECRET_KEY, algorithms=ALGORITHM)
     return UserDecoded(**payload)
+
+
+def is_admin(request: Request):
+    token = request.headers.get("bearer")
+    if not token:
+        raise HTTPException(
+            status_code=401, detail="Invalid authentication credentials"
+        )
+    payload = jwt.decode(token, SECRET_KEY, algorithms=ALGORITHM)
+    if payload["role"] != "ADMIN":
+        raise HTTPException(status_code=403, detail="You don't have permission")

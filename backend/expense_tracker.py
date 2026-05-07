@@ -1,7 +1,7 @@
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from dependencies import get_current_user, get_token_header
-from user_crud import Users, RegisterRequest, UserRole
+from models.user_model import LoginRequest, UserBase, Users, RegisterRequest, UserRole
 from expense_tracker_crud import (
     create_access_token,
     get_password_hash,
@@ -50,7 +50,7 @@ app.add_middleware(
 # --- Endpoints ---
 @app.post("/login")
 async def login(
-    form_data: RegisterRequest,
+    form_data: LoginRequest,
     db: Session = Depends(get_session),
 ):
     user = db.exec(select(Users).where(Users.email == form_data.email.lower())).first()
@@ -63,18 +63,32 @@ async def login(
         data={"email": form_data.email, "role": user.role, "id": str(user.id)},
         expires_delta=access_token_expires,
     )
-    return {"access_token": access_token, "email": form_data.email, "role": user.role}
+    return {
+        "access_token": access_token,
+        "email": form_data.email,
+        "role": user.role,
+        "name": user.name,
+        "id": str(user.id),
+    }
 
 
 @app.post("/register")
 async def register(body: RegisterRequest, db: Session = Depends(get_session)):
     db_user = Users(
-        email=body.email, password=get_password_hash(body.password), role=UserRole.USER
+        email=body.email,
+        password=get_password_hash(body.password),
+        role=UserRole.USER,
+        name=body.name,
     )
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
-    return db_user
+    return {
+        "id": db_user.id,
+        "email": db_user.email,
+        "role": db_user.role,
+        "name": db_user.name,
+    }
 
 
 add_pagination(app)
