@@ -1,5 +1,6 @@
 import { useState } from "react";
-import axios from "axios";
+import { AxiosError } from "axios";
+import { register } from "../config/api";
 import "./Register.css";
 
 interface RegisterProps {
@@ -7,7 +8,7 @@ interface RegisterProps {
 }
 
 export default function Register({ goToLogin }: RegisterProps) {
-  const [fullName, setFullName] = useState("");
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -19,8 +20,8 @@ export default function Register({ goToLogin }: RegisterProps) {
     }
 
     try {
-      await axios.post("http://localhost:8080/api/auth/register", {
-        fullName,
+      await register({
+        name,
         email,
         password,
       });
@@ -29,6 +30,11 @@ export default function Register({ goToLogin }: RegisterProps) {
       goToLogin();
     } catch (error) {
       console.error(error);
+      if (error instanceof AxiosError) {
+        alert(error.response?.data?.detail ?? "Registration failed");
+        return;
+      }
+
       alert("Registration failed");
     }
   };
@@ -45,8 +51,8 @@ export default function Register({ goToLogin }: RegisterProps) {
               type="text"
               placeholder="John Doe"
               className="register-input"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
             />
           </div>
           <div className="register-field">

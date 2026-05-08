@@ -40,3 +40,8 @@ export const login = async (params: any) => {
   const res = await axiosInstance.post("/login", params);
   return res.data;
 };
+
+export const register = async (params: any) => {
+  const res = await axiosInstance.post("/register", params);
+  return res.data;
+};
