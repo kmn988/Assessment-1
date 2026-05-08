@@ -1,14 +1,3 @@
-type DetailCategory = {
-  category: string;
-  percent: number;
-  amount: string;
-};
-
-type DetailBar = {
-  month: string;
-  value: number;
-};
-
 export type DetailUser = {
   id: number;
   name: string;
@@ -18,13 +7,6 @@ export type DetailUser = {
   initials: string;
   accent: "green" | "blue" | "gold";
   totalSpend: string;
-  thisMonth: string;
-  topCategory: string;
-  topCategoryTotal: string;
-  monthlyAverage: string;
-  activeMonths: string;
-  monthlyBars: DetailBar[];
-  categoryBreakdown: DetailCategory[];
 };
 
 type UserDetailProps = {
@@ -103,7 +85,6 @@ export default function UserDetail({
           <article className="user-detail-card">
             <p className="user-detail-label">This month</p>
             <h2 className="user-detail-value">-</h2>
-            <p className="user-detail-caption">&nbsp;</p>
           </article>
 
           <article className="user-detail-card">

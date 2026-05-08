@@ -12,24 +12,6 @@ const users: DetailUser[] = [
     totalSpend: "$1,240",
     initials: "AK",
     accent: "green",
-    thisMonth: "$320",
-    topCategory: "Food",
-    topCategoryTotal: "$480",
-    monthlyAverage: "$177",
-    activeMonths: "7",
-    monthlyBars: [
-      { month: "Jan", value: 180 },
-      { month: "Feb", value: 95 },
-      { month: "Mar", value: 240 },
-      { month: "Apr", value: 145 },
-      { month: "May", value: 320 },
-    ],
-    categoryBreakdown: [
-      { category: "Food", percent: 39, amount: "$480" },
-      { category: "Transport", percent: 22, amount: "$272" },
-      { category: "Utilities", percent: 20, amount: "$248" },
-      { category: "Entertainment", percent: 19, amount: "$240" },
-    ],
   },
   {
     id: 2,
@@ -40,24 +22,6 @@ const users: DetailUser[] = [
     totalSpend: "$3,120",
     initials: "AD",
     accent: "gold",
-    thisMonth: "$620",
-    topCategory: "Travel",
-    topCategoryTotal: "$1,100",
-    monthlyAverage: "$347",
-    activeMonths: "9",
-    monthlyBars: [
-      { month: "Jan", value: 260 },
-      { month: "Feb", value: 420 },
-      { month: "Mar", value: 380 },
-      { month: "Apr", value: 510 },
-      { month: "May", value: 620 },
-    ],
-    categoryBreakdown: [
-      { category: "Travel", percent: 35, amount: "$1,100" },
-      { category: "Food", percent: 24, amount: "$750" },
-      { category: "Shopping", percent: 21, amount: "$655" },
-      { category: "Bills", percent: 20, amount: "$615" },
-    ],
   },
 ];
 
@@ -134,7 +98,10 @@ export default function AdminScreen() {
 
         <section className="admin-table-card">
           <div className="admin-table admin-table-head">
-            <span>Name</span>
+            <div className="admin-user-cell admin-user-cell-head">
+              <span className="admin-user-avatar admin-user-avatar-placeholder" />
+              <span>Name</span>
+            </div>
             <span>Email</span>
             <span>Role</span>
             <span>Joined</span>

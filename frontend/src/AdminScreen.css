@@ -28,11 +28,12 @@
 }
 
 .admin-brand {
-  padding: 26px 28px;
+  padding: 26px 40px;
   border-bottom: 1px solid var(--panel-border);
   font-size: 18px;
   font-weight: 700;
   line-height: 1.2;
+  align-self: start;
 }
 
 .admin-nav {
@@ -136,7 +137,7 @@
 
 .admin-table {
   display: grid;
-  grid-template-columns: 2.6fr 1.7fr 1fr 1.2fr 1.15fr 60px;
+  grid-template-columns: 1.6fr 1fr 1fr 1.2fr 1.15fr 60px;
   align-items: center;
   gap: 16px;
   padding: 16px 20px;
@@ -147,8 +148,12 @@
   font-size: 14px;
   font-weight: 700;
   border-bottom: 1px solid var(--panel-border);
-  padding-left: 12px;
-  margin:0;
+  margin: 0;
+}
+
+.admin-table-head > span,
+.admin-table-head > div {
+  justify-self: start;
 }
 
 .admin-row {
@@ -182,11 +187,19 @@
   min-width: 0;
 }
 
+.admin-user-cell-head {
+  font-size: inherit;
+}
+
 .admin-user-avatar {
   width: 46px;
   height: 46px;
   font-size: 17px;
   flex-shrink: 0;
+}
+
+.admin-user-avatar-placeholder {
+  visibility: hidden;
 }
 
 .admin-user-avatar-green {
@@ -450,63 +463,4 @@
   height: 100%;
   border-radius: inherit;
   background: linear-gradient(90deg, #d8ff41 0%, #b8eb2e 100%);
-}
-
-@media (max-width: 1200px) {
-  .admin-screen {
-    grid-template-columns: 220px minmax(0, 1fr);
-  }
-
-  .admin-table {
-    grid-template-columns: 2.4fr 1.5fr 0.9fr 1fr 1fr 44px;
-  }
-
-  .user-detail-summary-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 920px) {
-  .admin-screen {
-    grid-template-columns: 1fr;
-  }
-
-  .admin-sidebar {
-    border-right: 0;
-    border-bottom: 1px solid var(--panel-border);
-  }
-
-  .admin-nav {
-    flex: initial;
-  }
-
-  .admin-main {
-    padding: 28px 18px 24px;
-  }
-
-  .admin-toolbar {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .admin-search {
-    width: 100%;
-  }
-
-  .admin-table-card {
-    overflow-x: auto;
-  }
-
-  .admin-table {
-    min-width: 960px;
-  }
-
-  .user-detail-summary-grid,
-  .user-detail-bar-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .user-detail-bar-track {
-    min-height: 80px;
-  }
 }
