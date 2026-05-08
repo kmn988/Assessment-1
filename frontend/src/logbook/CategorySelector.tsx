@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { CATEGORIES } from "../config/value";
 
 interface CategorySelectorProps {
@@ -31,7 +31,7 @@ const CategorySelector = ({ value, onChange }: CategorySelectorProps) => {
           style={{ minWidth: 240 }}
         >
           <div className="grid grid-cols-1 gap-1 p-3">
-            {options.map((category, i) => (
+            {options.map((category) => (
               <button
                 key={category}
                 onClick={() => {

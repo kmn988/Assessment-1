@@ -37,6 +37,6 @@ export const get_trend = async (params: any) => {
 
 
 export const login = async (params: any) => {
-  const res = await axiosInstance.post("/auth/login", params);
+  const res = await axiosInstance.post("/login", params);
   return res.data;
-}
+};

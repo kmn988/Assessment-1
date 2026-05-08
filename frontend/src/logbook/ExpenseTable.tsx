@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import Pagination from "../common/Pagination";
 import {
   create_expense,
   delete_expense_by_id,
@@ -112,7 +111,7 @@ const ExpenseTable = () => {
   };
 
   const handleEdit = async (form: Omit<Expense, "id">) => {
-    await update_expense_by_id({ id: selectedExpense?.id, form });
+    await update_expense_by_id({ id: selectedExpense?.id, params: form });
     fetchExpenses();
     fetchExpenseByCategory();
   };
@@ -218,11 +217,10 @@ const ExpenseTable = () => {
                         <div>{item.amount}</div>
                         <div className="flex gap-2">
                           {actionButtons.map((button) => (
-                            <div>
+                            <div key={button.title}>
                               <button
                                 className="border-solid border-2 rounded-full px-2 hover:cursor-pointer"
                                 onClick={() => button.action(item)}
-                                key={button.title}
                               >
                                 {button.title}
                               </button>

@@ -24,7 +24,7 @@ const DonutChart = ({ data }: DonutChartProps) => {
   };
   const legendMargin: Plugin<"doughnut"> = {
     id: "legendDistance",
-    beforeInit(chart: any, args, opts) {
+    beforeInit(chart: any, _args, opts) {
       const originalFit = chart.legend.fit;
       chart.legend.fit = function fit() {
         originalFit.bind(chart.legend)();

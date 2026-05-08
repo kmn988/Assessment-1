@@ -1,6 +1,14 @@
 import { useState } from "react";
-import axios from "axios";
 import "./Login.css";
+import { login } from "../config/api";
+import {jwtDecode} from "jwt-decode";
+
+type DecodedToken = {
+  sub: string;
+  email: string;
+  exp: number;
+  role:"ADMIN" | "USER";
+};
 
 interface LoginProps {
   goToRegister: () => void;
@@ -12,85 +20,81 @@ export default function Login({ goToRegister }: LoginProps) {
   const [password, setPassword] = useState("");
 
   // Login function
-  const handleLogin = async () => {
-    try {
-      // Call backend login API
-      const response = await axios.post(
-        "http://localhost:8080/api/auth/login",
-        {
-          email,
-          password,
-        }
-      );
+const handleLogin = async () => {
+  try {
+    const response = await login({ email, password });
+    const token = response.access_token ?? response.token;
 
-      // get token
-      const token = response.data.access_token;
+    const decoded = jwtDecode<DecodedToken>(token);
 
-      // save to localStorage
-      localStorage.setItem("token", token);
+    localStorage.setItem("token", token);
+    localStorage.setItem("role", decoded.role);
+    localStorage.setItem("user", JSON.stringify(decoded));
 
-      alert("Login successful");
-
-      window.location.href = "/dashboard";
-    } catch (error) {
-      console.error(error);
-      alert("Login failed");
+    if (decoded.role === "ADMIN") {
+      window.location.href = "/admin";
+    } else {
+      window.location.href = "/user";
     }
-  };
+  } catch (error) {
+    console.error(error);
+    alert("Login failed");
+  }
+};
 
 
-return (
-  <div className="login-page">
-    <div className="login-modal">
-      <h1 className="login-title">Welcome back</h1>
-      <p className="login-subtitle">Sign in to Expense Tracker</p>
+  return (
+    <div className="login-page">
+      <div className="login-modal">
+        <h1 className="login-title">Welcome back</h1>
+        <p className="login-subtitle">Sign in to Expense Tracker</p>
 
-      <form className="login-form space-y-5">
-        <div className="login-field">
-          <label className="login-label">Email</label>
-          <input
-            type="email"
-            placeholder="you@example.com"
-            className="login-input"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </div>
+        <form className="login-form space-y-5">
+          <div className="login-field">
+            <label className="login-label">Email</label>
+            <input
+              type="email"
+              placeholder="you@example.com"
+              className="login-input"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
 
-        <div className="login-field">
-          <label className="login-label">Password</label>
-          <input
-            type="password"
-            placeholder="........"
-            className="login-input"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
+          <div className="login-field">
+            <label className="login-label">Password</label>
+            <input
+              type="password"
+              placeholder="........"
+              className="login-input"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
 
-        <div className="login-link-row">
-          <button type="button" className="login-link">
-            Forgot password?
+          <div className="login-link-row">
+            <button type="button" className="login-link">
+              Forgot password?
+            </button>
+          </div>
+
+          <button type="submit" className="login-submit" onClick={(e) => {
+            e.preventDefault();
+            handleLogin();
+          }}>
+            Sign in
           </button>
-        </div>
+        </form>
 
-        <button type="submit" className="login-submit" onClick={(e) => {
-          e.preventDefault();
-          handleLogin();
-        }}>
-          Sign in
-        </button>
-      </form>
-
-      <p className="login-footer">
-        No account?{" "}
-        <button type="button" className="login-footer-link" onClick={goToRegister}>
-          Create one
-        </button>
-      </p>
+        <p className="login-footer">
+          No account?{" "}
+          <button type="button" className="login-footer-link" onClick={goToRegister}>
+            Create one
+          </button>
+        </p>
+      </div>
     </div>
-  </div>
-);
+  );
 
 
 }

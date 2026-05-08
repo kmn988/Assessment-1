@@ -10,7 +10,6 @@ import {
 } from "chart.js";
 import { useEffect, useState } from "react";
 import BarChart from "./BarChart";
-import axiosInstance from "../config/axios";
 import YearSelector from "./YearSelector";
 import { get_trend } from "../config/api";
 

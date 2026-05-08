@@ -5,12 +5,14 @@ import Menu from "./menu/Menu";
 import TrendChart from "./trend/Trend";
 import Login from "./auth/Login";
 import Register from "./auth/Register";
+import AdminScreen from "./AdminScreen";
 
 function App() {
   const [tab, setTab] = useState(0);
   const [authPage, setAuthPage] = useState<"login" | "register">("login");
 
   const token = localStorage.getItem("token");
+  const role = localStorage.getItem("role");
 
   if (!token) {
     return authPage === "login" ? (
@@ -18,6 +20,10 @@ function App() {
     ) : (
       <Register goToLogin={() => setAuthPage("login")} />
     );
+  }
+
+  if (role === "ADMIN") {
+    return <AdminScreen />;
   }
 
   return (
@@ -28,6 +34,5 @@ function App() {
     </div>
   );
 }
-
 
 export default App;
