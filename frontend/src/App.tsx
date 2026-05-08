@@ -3,9 +3,22 @@ import "./App.css";
 import ExpenseTable from "./logbook/ExpenseTable";
 import Menu from "./menu/Menu";
 import TrendChart from "./trend/Trend";
+import Login from "./auth/Login";
+import Register from "./auth/Register";
 
 function App() {
   const [tab, setTab] = useState(0);
+  const [authPage, setAuthPage] = useState<"login" | "register">("login");
+
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    return authPage === "login" ? (
+      <Login goToRegister={() => setAuthPage("register")} />
+    ) : (
+      <Register goToLogin={() => setAuthPage("login")} />
+    );
+  }
 
   return (
     <div className="flex flex-col md:flex-row w-full">
@@ -15,5 +28,6 @@ function App() {
     </div>
   );
 }
+
 
 export default App;
