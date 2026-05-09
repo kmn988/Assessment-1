@@ -10,11 +10,22 @@ import AdminScreen from "./AdminScreen";
 function App() {
   const [tab, setTab] = useState(0);
   const [authPage, setAuthPage] = useState<"login" | "register">("login");
+  const [isAuthenticated, setIsAuthenticated] = useState(
+    Boolean(localStorage.getItem("token")),
+  );
 
-  const token = localStorage.getItem("token");
   const role = localStorage.getItem("role");
 
-  if (!token) {
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    localStorage.removeItem("user");
+    setTab(0);
+    setAuthPage("login");
+    setIsAuthenticated(false);
+  };
+
+  if (!isAuthenticated) {
     return authPage === "login" ? (
       <Login goToRegister={() => setAuthPage("register")} />
     ) : (
@@ -23,12 +34,12 @@ function App() {
   }
 
   if (role === "ADMIN") {
-    return <AdminScreen />;
+    return <AdminScreen onLogout={handleLogout} />;
   }
 
   return (
     <div className="flex flex-col md:flex-row w-full">
-      <Menu setTab={setTab} tab={tab} />
+      <Menu setTab={setTab} tab={tab} onLogout={handleLogout} />
       {tab === 0 && <ExpenseTable />}
       {tab === 1 && <TrendChart />}
     </div>

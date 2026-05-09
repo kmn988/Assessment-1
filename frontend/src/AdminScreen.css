@@ -66,6 +66,24 @@
   border-top: 1px solid var(--panel-border);
 }
 
+.admin-logout {
+  margin: 0 28px 24px;
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  padding: 12px 16px;
+  background: transparent;
+  color: var(--text-main);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  cursor: pointer;
+}
+
+.admin-logout:hover {
+  background: #1b212b;
+}
+
 .admin-profile-avatar,
 .admin-user-avatar {
   display: grid;
