@@ -8,7 +8,7 @@ import uuid
 import bcrypt
 from models.expense_model import CustomPage
 from models.user_model import USER_SORT_COLUMNS, UserBase, Users, UsersFilterParams, CreateUserRequest, UpdateUserRequest
-from expense_crud import db_get_trends
+from expense_crud import db_get_trends, db_get_categories_by_user_year
 from fastapi_pagination.ext.sqlalchemy import paginate
 
 
@@ -44,7 +44,8 @@ async def db_get_user_detail(session: Session, user_id: str, year: int):
     if not user:
         return None
     user_trend = db_get_trends(year, user, session)
-    return {"user": user, "trend": user_trend}
+    user_categories = db_get_categories_by_user_year(year, user_id, session)
+    return {"user": user, "trend": user_trend, "categories": user_categories}
 
 
 async def db_create_user(session: Session, body: CreateUserRequest) -> Users:

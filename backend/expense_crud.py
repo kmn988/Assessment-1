@@ -131,3 +131,18 @@ async def db_get_expense_by_category(
         else:
             expense_by_category[item.category] = float(item.amount)
     return expense_by_category
+
+
+def db_get_categories_by_user_year(
+    year: int, user_id: uuid.UUID, session: Session
+) -> dict[str, float]:
+    statement = (
+        select(Expense)
+        .where(Expense.date.contains(str(year)))
+        .where(Expense.user_id == user_id)
+    )
+    categories: dict[str, float] = {}
+    for item in session.exec(statement).all():
+        cat = str(item.category)
+        categories[cat] = categories.get(cat, 0) + float(item.amount)
+    return dict(sorted(categories.items(), key=lambda x: x[1], reverse=True))

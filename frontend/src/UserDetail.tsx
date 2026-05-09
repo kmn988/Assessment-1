@@ -10,6 +10,7 @@ type ApiUser = {
 };
 
 type Trend = Record<string, number>;
+type Categories = Record<string, number>;
 
 type UserDetailProps = {
   userId: string;
@@ -42,6 +43,7 @@ export default function UserDetail({
 }: UserDetailProps) {
   const [user, setUser] = useState<ApiUser | null>(null);
   const [trend, setTrend] = useState<Trend>({});
+  const [categories, setCategories] = useState<Categories>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -54,6 +56,7 @@ export default function UserDetail({
       .then((data) => {
         setUser(data.user);
         setTrend(data.trend ?? {});
+        setCategories(data.categories ?? {});
       })
       .catch(() => setError("Failed to load user details."))
       .finally(() => setLoading(false));
@@ -186,6 +189,41 @@ export default function UserDetail({
               })}
             </div>
           )}
+        </section>
+
+        <section className="user-detail-panel">
+          <h3 className="user-detail-panel-title">Spend by category — {year}</h3>
+          {Object.keys(categories).length === 0 ? (
+            <div className="user-detail-empty">No category data for {year}</div>
+          ) : (() => {
+            const catTotal = Object.values(categories).reduce((a, b) => a + b, 0);
+            return (
+              <div className="user-detail-category-list">
+                {Object.entries(categories).map(([cat, amount]) => {
+                  const pct = catTotal > 0 ? (amount / catTotal) * 100 : 0;
+                  return (
+                    <div key={cat} className="user-detail-category-row">
+                      <div className="user-detail-category-head">
+                        <span>{cat}</span>
+                        <span className="user-detail-category-meta">
+                          ${amount.toFixed(2)}
+                          <span className="user-detail-category-pct">
+                            {pct.toFixed(1)}%
+                          </span>
+                        </span>
+                      </div>
+                      <div className="user-detail-category-track">
+                        <div
+                          className="user-detail-category-fill"
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })()}
         </section>
       </main>
     </div>
