@@ -27,7 +27,10 @@ function App() {
 
   if (!isAuthenticated) {
     return authPage === "login" ? (
-      <Login goToRegister={() => setAuthPage("register")} />
+      <Login
+        goToRegister={() => setAuthPage("register")}
+        onLogin={() => setIsAuthenticated(true)}
+      />
     ) : (
       <Register goToLogin={() => setAuthPage("login")} />
     );

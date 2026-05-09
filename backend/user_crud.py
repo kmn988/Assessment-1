@@ -5,8 +5,9 @@ from sqlmodel import (
     desc,
 )
 import uuid
+import bcrypt
 from models.expense_model import CustomPage
-from models.user_model import USER_SORT_COLUMNS, UserBase, Users, UsersFilterParams
+from models.user_model import USER_SORT_COLUMNS, UserBase, Users, UsersFilterParams, CreateUserRequest, UpdateUserRequest
 from expense_crud import db_get_trends
 from fastapi_pagination.ext.sqlalchemy import paginate
 
@@ -40,5 +41,32 @@ def db_get_user(session: Session, user_id: str) -> UserBase | None:
 
 async def db_get_user_detail(session: Session, user_id: str, year: int):
     user = db_get_user(session, user_id)
+    if not user:
+        return None
     user_trend = db_get_trends(year, user, session)
     return {"user": user, "trend": user_trend}
+
+
+async def db_create_user(session: Session, body: CreateUserRequest) -> Users:
+    hashed = bcrypt.hashpw(body.password.encode(), bcrypt.gensalt(12)).decode()
+    user = Users(email=body.email, password=hashed, role=body.role, name=body.name)
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+    return user
+
+
+async def db_update_user(session: Session, user_id: uuid.UUID, body: UpdateUserRequest) -> UserBase | None:
+    user = session.exec(select(Users).where(Users.id == user_id)).first()
+    if not user:
+        return None
+    if body.name is not None:
+        user.name = body.name
+    if body.email is not None:
+        user.email = body.email
+    if body.role is not None:
+        user.role = body.role
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+    return UserBase.model_validate(user)
