@@ -105,7 +105,8 @@ const ExpenseTable = () => {
     setExpenseByCategory(response);
   };
   const handleCreate = async (form: Omit<Expense, "id">) => {
-    await create_expense(form);
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    await create_expense({ user_id: user.id, ...form });
     fetchExpenses();
     fetchExpenseByCategory();
   };

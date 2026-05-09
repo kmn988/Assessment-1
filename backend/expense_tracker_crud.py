@@ -15,13 +15,13 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 load_dotenv()
 # Establish a db connection
-username = os.getenv("db_username", "root")
-password = os.getenv("db_password", "NewPassword123!")
-database_name = os.getenv("db_name", "expense_tracker")
-database_host = os.getenv("db_host", "localhost")
-database_port = int(os.getenv("db_port", "3306"))
-SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret")
-ALGORITHM = os.getenv("ALGORITHM", "HS256")
+username = os.getenv("db_username")
+password = os.getenv("db_password")
+database_name = os.getenv("db_name")
+database_host = os.getenv("db_host")
+database_port = int(os.getenv("db_port"))
+SECRET_KEY = os.getenv("SECRET_KEY")
+ALGORITHM = os.getenv("ALGORITHM")
 
 DATABASE_URL = f"mysql+pymysql://{username}:{password}@{database_host}:{database_port}/{database_name}"
 engine = create_engine(DATABASE_URL, echo=True)
