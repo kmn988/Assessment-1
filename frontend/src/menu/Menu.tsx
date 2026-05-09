@@ -1,24 +1,36 @@
+import "./Menu.css";
+
 interface MenuProps {
   setTab: (tab: number) => void;
   tab: number;
+  onLogout: () => void;
 }
-const Menu = ({ setTab, tab }: MenuProps) => {
+
+const Menu = ({ setTab, tab, onLogout }: MenuProps) => {
   const tabs = ["Logbook", "Trend"];
 
   return (
-    <div className="w-full md:w-1/6 md:max-w-50 md:min-h-screen bg-gray-800 flex flex-col md:gap-10">
-      <div className="text-xl md:text-2xl font-bold p-4">Expense Tracker</div>
-      <div className="w-full text-xl bg-gray-800 hover:cursor-pointer flex md:flex-col overflow-x-auto ">
+    <div className="menu-shell">
+      <div className="menu-brand">Expense Tracker</div>
+      <div className="menu-tabs">
         {tabs.map((tabName, i) => (
           <button
-            className={`px-4 md:w-full p-2 hover:cursor-pointer ${tab === i ? "text-black bg-main hover:bg-main" : "hover:bg-gray-700"}`}
+            className={`menu-tab ${tab === i ? "menu-tab-active" : ""}`}
             onClick={() => setTab(i)}
             key={i}
+            type="button"
           >
             {tabName}
           </button>
         ))}
       </div>
+      <button
+        className="menu-logout"
+        onClick={onLogout}
+        type="button"
+      >
+        Logout
+      </button>
     </div>
   );
 };

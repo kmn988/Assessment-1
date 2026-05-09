@@ -1,0 +1,81 @@
+.menu-shell {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #1f2937;
+  color: #f9fafb;
+}
+
+.menu-brand {
+  padding: 1rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.menu-tabs {
+  display: flex;
+  width: 100%;
+  overflow-x: auto;
+  font-size: 1.25rem;
+}
+
+.menu-tab {
+  border: 0;
+  padding: 0.5rem 1rem;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.menu-tab:hover {
+  background: #374151;
+}
+
+.menu-tab-active,
+.menu-tab-active:hover {
+  background: var(--color-main, #d9ff57);
+  color: #111827;
+}
+
+.menu-logout {
+  margin: 1rem 1rem 1.5rem;
+  border: 1px solid #4b5563;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: transparent;
+  color: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+}
+
+.menu-logout:hover {
+  background: #374151;
+}
+
+@media (min-width: 768px) {
+  .menu-shell {
+    width: 16.666667%;
+    max-width: 12.5rem;
+    min-height: 100vh;
+    gap: 2.5rem;
+  }
+
+  .menu-brand {
+    font-size: 1.5rem;
+  }
+
+  .menu-tabs {
+    flex-direction: column;
+  }
+
+  .menu-tab {
+    width: 100%;
+  }
+
+  .menu-logout {
+    margin-top: auto;
+  }
+}

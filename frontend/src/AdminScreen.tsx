@@ -31,7 +31,11 @@ const currentAdmin = {
   initials: "AD",
 };
 
-export default function AdminScreen() {
+interface AdminScreenProps {
+  onLogout: () => void;
+}
+
+export default function AdminScreen({ onLogout }: AdminScreenProps) {
   const [search, setSearch] = useState("");
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
 
@@ -81,6 +85,10 @@ export default function AdminScreen() {
             <p className="admin-profile-email">{currentAdmin.email}</p>
           </div>
         </div>
+
+        <button className="admin-logout" type="button" onClick={onLogout}>
+          Logout
+        </button>
       </aside>
 
       <main className="admin-main">
