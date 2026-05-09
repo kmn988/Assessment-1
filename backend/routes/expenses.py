@@ -75,7 +75,7 @@ async def delete_expense(
 
 @router.get("/trends")
 async def get_trend(year: int, user: CurrentUser, db: Session = Depends(get_session)):
-    return await db_get_trends(year, user, db)
+    return db_get_trends(year, user, db)
 
 
 @router.get("/expense_by_category")

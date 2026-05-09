@@ -7,22 +7,30 @@ from sqlmodel import (
 )
 import uuid
 
+from models.expense_model import SortDirection
+
 
 class UserRole(str, Enum):
     ADMIN = "ADMIN"
     USER = "USER"
 
 
+class SortKey(str, Enum):
+    NAME = "name"
+    EMAIL = "email"
+    ROLE = "role"
+
+
 class UsersFilterParams(BaseModel):
     search: str = Field(None)
-    sort_key: str = Field(None)
-    sort_dir: str = Field(None)
+    sort_key: SortKey = Field(None)
+    sort_dir: SortDirection = Field(None)
 
 
 class UserBase(SQLModel):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     email: EmailStr = Field(unique=True, index=True, max_length=255)
-    role: str = Field(max_length=256, default=UserRole.USER)
+    role: UserRole = Field(default=UserRole.USER)
     name: str = Field(max_length=256)
 
     @field_validator("role")
@@ -73,4 +81,8 @@ class RegisterRequest(LoginRequest):
     name: str = Field(max_length=256)
 
 
-USER_SORT_COLUMNS = {"email": Users.email, "name": Users.name, "role": Users.role}
+USER_SORT_COLUMNS = {
+    SortKey.NAME: Users.name,
+    SortKey.EMAIL: Users.email,
+    SortKey.ROLE: Users.role,
+}
