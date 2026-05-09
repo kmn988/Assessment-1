@@ -1,7 +1,7 @@
 from fastapi import HTTPException, Depends, Response, status, Query, APIRouter
 from models.expense_model import ExpenseBase
 from models.user_model import UserDecoded
-from dependencies import get_current_user
+from dependencies import get_current_user, is_user
 from expense_crud import (
     CustomPage,
     Expense,
@@ -20,7 +20,7 @@ from expense_tracker_crud import get_session
 import uuid
 
 CurrentUser = Annotated[UserDecoded, Depends(get_current_user)]
-router = APIRouter(dependencies=[Depends(get_current_user)])
+router = APIRouter(dependencies=[Depends(get_current_user), Depends(is_user)])
 
 
 @router.get("/expenses", response_model=CustomPage[Expense])

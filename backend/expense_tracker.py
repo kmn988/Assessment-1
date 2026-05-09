@@ -20,10 +20,8 @@ from datetime import timedelta
 
 header_scheme = HTTPBearer(auto_error=False)
 app = FastAPI(title="Simple To-Do API", dependencies=[Depends(header_scheme)])
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
-app.include_router(
-    expenses.router, tags=["expenses"], dependencies=[Depends(get_current_user)]
-)
+ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24
+app.include_router(expenses.router, tags=["expenses"])
 app.include_router(users.router, prefix="/users", tags=["users"])
 # Define the origins that are allowed to talk to your server
 origins = [
