@@ -72,6 +72,13 @@
   border-color: #a3e635;
 }
 
+.login-error {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #f87171;
+  text-align: left;
+}
+
 .login-link-row {
   display: flex;
   justify-content: flex-end;

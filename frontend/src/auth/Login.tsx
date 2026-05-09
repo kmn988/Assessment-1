@@ -18,10 +18,12 @@ export default function Login({ goToRegister }: LoginProps) {
   // save email and password in state
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   // Login function
 const handleLogin = async () => {
   try {
+    setErrorMessage("");
     const response = await login({ email, password });
     const token = response.access_token ?? response.token;
 
@@ -38,7 +40,7 @@ const handleLogin = async () => {
     }
   } catch (error) {
     console.error(error);
-    alert("Login failed");
+    setErrorMessage("Password or email is incorrect");
   }
 };
 
@@ -57,7 +59,10 @@ const handleLogin = async () => {
               placeholder="you@example.com"
               className="login-input"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setErrorMessage("");
+              }}
             />
           </div>
 
@@ -68,8 +73,12 @@ const handleLogin = async () => {
               placeholder="........"
               className="login-input"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setErrorMessage("");
+              }}
             />
+            {errorMessage && <p className="login-error">{errorMessage}</p>}
           </div>
 
           <div className="login-link-row">

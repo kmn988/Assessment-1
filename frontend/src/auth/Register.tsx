@@ -12,10 +12,13 @@ export default function Register({ goToLogin }: RegisterProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleRegister = async () => {
+    setErrorMessage("");
+
     if (password !== confirmPassword) {
-      alert("Passwords do not match");
+      setErrorMessage("Passwords do not match");
       return;
     }
 
@@ -31,11 +34,11 @@ export default function Register({ goToLogin }: RegisterProps) {
     } catch (error) {
       console.error(error);
       if (error instanceof AxiosError) {
-        alert(error.response?.data?.detail ?? "Registration failed");
+        setErrorMessage(error.response?.data?.detail ?? "Registration failed");
         return;
       }
 
-      alert("Registration failed");
+      setErrorMessage("Registration failed");
     }
   };
   return (
@@ -52,7 +55,10 @@ export default function Register({ goToLogin }: RegisterProps) {
               placeholder="John Doe"
               className="register-input"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => {
+                setName(e.target.value);
+                setErrorMessage("");
+              }}
             />
           </div>
           <div className="register-field">
@@ -62,7 +68,10 @@ export default function Register({ goToLogin }: RegisterProps) {
               placeholder="you@example.com"
               className="register-input"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setErrorMessage("");
+              }}
             />
           </div>
 
@@ -73,7 +82,10 @@ export default function Register({ goToLogin }: RegisterProps) {
               placeholder="........"
               className="register-input"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setErrorMessage("");
+              }}
             />
           </div>
 
@@ -84,8 +96,12 @@ export default function Register({ goToLogin }: RegisterProps) {
               placeholder="........"
               className="register-input"
               value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              onChange={(e) => {
+                setConfirmPassword(e.target.value);
+                setErrorMessage("");
+              }}
             />
+            {errorMessage && <p className="register-error">{errorMessage}</p>}
           </div>
 
           <div className="register-link-row">

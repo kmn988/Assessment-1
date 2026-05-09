@@ -71,6 +71,13 @@
   border-color: #a3e635;
 }
 
+.register-error {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #f87171;
+  text-align: left;
+}
+
 .register-link-row {
   display: flex;
   justify-content: flex-end;
