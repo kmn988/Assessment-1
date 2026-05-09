@@ -1,3 +1,4 @@
+import datetime
 from fastapi import HTTPException, Header, Request
 import jwt
 from dotenv import load_dotenv
@@ -26,10 +27,20 @@ def get_bearer_token(request: Request) -> str:
 def get_current_user(request: Request):
     token = get_bearer_token(request)
     payload = jwt.decode(token, SECRET_KEY, algorithms=ALGORITHM)
+    exp = payload.get("exp")
+    if exp is None or datetime.datetime.now(datetime.timezone.utc).timestamp() > exp:
+        raise HTTPException(status_code=401, detail="Token has expired")
+
     return UserDecoded(**payload)
 
 
 def is_admin(request: Request):
     payload = get_current_user(request)
     if payload.role != "ADMIN":
+        raise HTTPException(status_code=403, detail="You don't have permission")
+
+
+def is_user(request: Request):
+    payload = get_current_user(request)
+    if payload.role != "USER":
         raise HTTPException(status_code=403, detail="You don't have permission")
