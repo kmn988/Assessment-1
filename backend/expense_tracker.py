@@ -1,28 +1,24 @@
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from dependencies import get_current_user, get_token_header
-from models.user_model import LoginRequest, UserBase, Users, RegisterRequest, UserRole
+from dependencies import get_current_user
+from models.user_model import LoginRequest, Users, RegisterRequest, UserRole
 from expense_tracker_crud import (
     create_access_token,
     get_password_hash,
     get_session,
     verify_password,
 )
-from fastapi_pagination import Page, add_pagination
-from fastapi_pagination.ext.sqlalchemy import paginate
-from fastapi_pagination.customization import CustomizedPage, UseParamsFields
+from fastapi_pagination import add_pagination
 from typing import TypeVar
 from routes import expenses
 from routes import users
 from fastapi.security import (
-    APIKeyHeader,
-    OAuth2PasswordBearer,
-    OAuth2PasswordRequestForm,
+    HTTPBearer,
 )
 from sqlmodel import Session, select
 from datetime import timedelta
 
-header_scheme = APIKeyHeader(name="Bearer", auto_error=False)
+header_scheme = HTTPBearer(auto_error=False)
 app = FastAPI(title="Simple To-Do API", dependencies=[Depends(header_scheme)])
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 app.include_router(
@@ -60,7 +56,12 @@ async def login(
 
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"email": form_data.email, "role": user.role, "id": str(user.id)},
+        data={
+            "email": form_data.email,
+            "role": user.role,
+            "id": str(user.id),
+            "name": user.name,
+        },
         expires_delta=access_token_expires,
     )
     return {

@@ -6,12 +6,9 @@ from sqlmodel import (
     cast,
     Float,
 )
-
 import uuid
-
 from fastapi_pagination import Page
-
-
+from datetime import date
 from fastapi_pagination.customization import CustomizedPage, UseParamsFields
 from typing import TypeVar
 
@@ -20,7 +17,7 @@ class ExpenseBase(SQLModel):
     user_id: uuid.UUID = Field(foreign_key="users.id", index=True)
     title: str = Field(max_length=256)
     category: str = Field(max_length=256)
-    date: str = Field(max_length=256)
+    date: date
     amount: float
     description: str | None = Field(max_length=256)
 
@@ -32,8 +29,6 @@ class Expense(ExpenseBase, table=True):
 class FilterParams(BaseModel):
     month: int = Field(0, gt=0, le=100)
     year: int = Field(0, ge=0)
-    skip: int = Field(None, ge=0)
-    limit: int = Field(None, ge=0)
     category: str = Field(None)
     search: str = Field(None)
     sort_key: str = Field(None)

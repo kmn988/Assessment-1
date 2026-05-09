@@ -1,21 +1,44 @@
 from sqlmodel import (
     Session,
     select,
+    asc,
+    desc,
 )
 import uuid
-from models.user_model import Users
+from models.expense_model import CustomPage
+from models.user_model import USER_SORT_COLUMNS, UserBase, Users, UsersFilterParams
 from expense_crud import db_get_trends
+from fastapi_pagination.ext.sqlalchemy import paginate
 
 
-def db_get_users(session: Session):
-    return session.exec(select(Users)).all()
+async def db_get_users(
+    session: Session, query: UsersFilterParams
+) -> CustomPage[UserBase]:
+    search, sort_key, sort_dir = (query.search, query.sort_key, query.sort_dir)
+    statement = select(Users)
+    if search is not None:
+        statement = statement.where(Users.name.contains(search)).where(
+            Users.email.contains(search)
+        )
+    sort_column = USER_SORT_COLUMNS.get(sort_key, Users.email)
+    if sort_dir is not None:
+        if sort_dir == "desc":
+            statement = statement.order_by(desc(sort_column))
+        else:
+            statement = statement.order_by(asc(sort_column))
+    else:
+        statement = statement.order_by(desc(sort_column))
+    return paginate(session, statement)
 
 
-def db_get_user(session: Session, user_id: str):
-    return session.exec(select(Users).where(Users.id == user_id)).first()
+def db_get_user(session: Session, user_id: str) -> UserBase | None:
+    user = session.exec(select(Users).where(Users.id == user_id)).first()
+    if not user:
+        return None
+    return UserBase.model_validate(user)
 
 
-def db_get_user_detail(session: Session, user_id: str, year: int):
+async def db_get_user_detail(session: Session, user_id: str, year: int):
     user = db_get_user(session, user_id)
     user_trend = db_get_trends(year, user, session)
-    return user_trend
+    return {"user": user, "trend": user_trend}

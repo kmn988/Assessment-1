@@ -1,5 +1,5 @@
 from enum import Enum
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from pydantic import BaseModel, EmailStr, field_validator
 import re
 from sqlmodel import (
     Field,
@@ -11,6 +11,12 @@ import uuid
 class UserRole(str, Enum):
     ADMIN = "ADMIN"
     USER = "USER"
+
+
+class UsersFilterParams(BaseModel):
+    search: str = Field(None)
+    sort_key: str = Field(None)
+    sort_dir: str = Field(None)
 
 
 class UserBase(SQLModel):
@@ -65,3 +71,6 @@ class LoginRequest(BaseModel):
 
 class RegisterRequest(LoginRequest):
     name: str = Field(max_length=256)
+
+
+USER_SORT_COLUMNS = {"email": Users.email, "name": Users.name, "role": Users.role}

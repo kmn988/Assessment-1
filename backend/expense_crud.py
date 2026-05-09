@@ -23,8 +23,9 @@ async def db_create_expense(
     session: Session, user: UserDecoded, expense_create: Expense
 ) -> Expense:
     expense_create = expense_create.model_dump(exclude_unset=True)
-    print(user, "usersssssssss")
-    expense = Expense(**expense_create, user_id=user.id)
+    expense = Expense(**expense_create)
+    if expense.user_id != user.id:
+        raise HTTPException(status_code=403, detail="You don't have permission")
     session.add(expense)
     return expense
 
@@ -36,19 +37,15 @@ async def db_get_expense(session: Session, expense_id: int) -> Optional[Expense]
 async def db_get_expenses(
     session: Session, user: UserDecoded, query: FilterParams
 ) -> CustomPage[Expense]:
-    month, year, skip, limit, category, search, sort_key, sort_dir = (
+    month, year, category, search, sort_key, sort_dir = (
         query.month,
         query.year,
-        query.skip,
-        query.limit,
         query.category,
         query.search,
         query.sort_key,
         query.sort_dir,
     )
-    statement = (
-        select(Expense).where(Expense.user_id == user.id).offset(skip).limit(limit)
-    )
+    statement = select(Expense).where(Expense.user_id == user.id)
     if month != 0 and year != 0:
         query_month = str(month).zfill(2)
         statement = statement.where(
@@ -98,9 +95,7 @@ async def db_delete_expense(
     return True
 
 
-async def db_get_trends(
-    year: int, user: UserDecoded, session: Session
-) -> dict[str, int]:
+def db_get_trends(year: int, user: UserDecoded, session: Session) -> dict[str, int]:
     yearly_expense_trends = {}
     current_year = datetime.date.today().year
     current_month = datetime.date.today().month

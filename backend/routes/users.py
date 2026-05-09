@@ -1,6 +1,9 @@
-from fastapi import Depends, APIRouter, HTTPException
+from typing import Annotated
+from fastapi import Depends, APIRouter, HTTPException, Query
 from sqlmodel import Session
 import uuid
+from models.user_model import UserBase, UsersFilterParams
+from models.expense_model import CustomPage
 from dependencies import is_admin
 from user_crud import db_get_user, db_get_user_detail, db_get_users
 from expense_tracker_crud import get_session
@@ -8,9 +11,11 @@ from expense_tracker_crud import get_session
 router = APIRouter(dependencies=[Depends(is_admin)])
 
 
-@router.get("/")
-async def get_all_users(db: Session = Depends(get_session)):
-    return await db_get_users(db)
+@router.get("", response_model=CustomPage[UserBase])
+async def get_all_users(
+    query: Annotated[UsersFilterParams, Query()], db: Session = Depends(get_session)
+):
+    return await db_get_users(db, query)
 
 
 @router.delete("/{user_id}")
@@ -27,4 +32,6 @@ async def get_user_detail(
     user_id: uuid.UUID, year: int, db: Session = Depends(get_session)
 ):
     data = await db_get_user_detail(db, user_id, year)
+    if not data:
+        raise HTTPException(status_code=404, detail="User not found")
     return data
