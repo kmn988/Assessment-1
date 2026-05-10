@@ -1,6 +1,8 @@
 .register-page {
   display: flex;
   justify-content: center;
+  align-items: center;
+  min-height: 100vh;
   padding: 1.5rem 2rem;
   background: #1a1f27;
 }
@@ -103,4 +105,27 @@
   font-size: 1rem;
   font-weight: 500;
   color: #a3e635;
+}
+
+.register-error {
+  font-size: 0.9rem;
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.1);
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  border-radius: 0.75rem;
+  padding: 0.6rem 0.9rem;
+}
+
+.register-success {
+  font-size: 0.9rem;
+  color: #4ade80;
+  background: rgba(74, 222, 128, 0.1);
+  border: 1px solid rgba(74, 222, 128, 0.3);
+  border-radius: 0.75rem;
+  padding: 0.6rem 0.9rem;
+}
+
+.register-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }

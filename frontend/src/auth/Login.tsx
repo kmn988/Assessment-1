@@ -3,6 +3,7 @@ import "./Login.css";
 import { login } from "../config/api";
 import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
+import { AxiosError } from "axios";
 
 type DecodedToken = {
   sub: string;
@@ -16,8 +17,12 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
-  // Login function
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
   const handleLogin = async () => {
+    setError("");
+    setLoading(true);
     try {
       const response = await login({ email, password });
       const token = response.access_token ?? response.token;
@@ -34,7 +39,17 @@ export default function Login() {
       }
     } catch (error) {
       console.error(error);
-      alert("Login failed");
+      if (error instanceof AxiosError) {
+        if (!error.response) {
+          setError("Cannot connect to server. Is the backend running?");
+        } else {
+          setError(error.response.data?.detail ?? "Invalid email or password.");
+        }
+      } else {
+        setError("Login failed. Please try again.");
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -67,21 +82,18 @@ export default function Login() {
             />
           </div>
 
-          <div className="login-link-row">
-            <button type="button" className="login-link">
-              Forgot password?
-            </button>
-          </div>
+          {error && <p className="login-error">{error}</p>}
 
           <button
             type="submit"
             className="login-submit"
+            disabled={loading}
             onClick={(e) => {
               e.preventDefault();
               handleLogin();
             }}
           >
-            Sign in
+            {loading ? "Signing in..." : "Sign in"}
           </button>
         </form>
 

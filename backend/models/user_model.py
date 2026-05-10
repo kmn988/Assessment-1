@@ -1,6 +1,7 @@
 from enum import Enum
 from pydantic import BaseModel, EmailStr, field_validator
 import re
+from typing import Optional
 from sqlmodel import (
     Field,
     SQLModel,
@@ -79,6 +80,16 @@ class LoginRequest(BaseModel):
 
 class RegisterRequest(LoginRequest):
     name: str = Field(max_length=256)
+
+
+class CreateUserRequest(RegisterRequest):
+    role: UserRole = Field(default=UserRole.USER)
+
+
+class UpdateUserRequest(BaseModel):
+    name: Optional[str] = Field(None, max_length=256)
+    email: Optional[EmailStr] = None
+    role: Optional[UserRole] = None
 
 
 USER_SORT_COLUMNS = {

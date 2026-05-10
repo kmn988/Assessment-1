@@ -9,30 +9,37 @@ export default function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const handleRegister = async () => {
+    setError("");
+    setSuccess("");
+
     if (password !== confirmPassword) {
-      alert("Passwords do not match");
+      setError("Passwords do not match.");
       return;
     }
 
+    setLoading(true);
     try {
-      await register({
-        name,
-        email,
-        password,
-      });
-
-      alert("Registration successful");
-      navigate("/login");
+      await register({ name, email, password });
+      setSuccess("Registration successful! Redirecting to login...");
+      setTimeout(() => navigate("/login"), 1500);
     } catch (error) {
       console.error(error);
       if (error instanceof AxiosError) {
-        alert(error.response?.data?.detail ?? "Registration failed");
-        return;
+        if (!error.response) {
+          setError("Cannot connect to server. Is the backend running?");
+        } else {
+          setError(error.response.data?.detail ?? "Registration failed.");
+        }
+      } else {
+        setError("Registration failed. Please try again.");
       }
-
-      alert("Registration failed");
+    } finally {
+      setLoading(false);
     }
   };
   return (
@@ -85,21 +92,19 @@ export default function Register() {
             />
           </div>
 
-          <div className="register-link-row">
-            <button type="button" className="register-link">
-              Forgot password?
-            </button>
-          </div>
+          {error && <p className="register-error">{error}</p>}
+          {success && <p className="register-success">{success}</p>}
 
           <button
             type="submit"
             className="register-submit"
+            disabled={loading}
             onClick={(e) => {
               e.preventDefault();
               handleRegister();
             }}
           >
-            Create Account
+            {loading ? "Creating account..." : "Create Account"}
           </button>
         </form>
 
