@@ -2,6 +2,7 @@ import { useState } from "react";
 import "./Login.css";
 import { login } from "../config/api";
 import {jwtDecode} from "jwt-decode";
+import { AxiosError } from "axios";
 
 type DecodedToken = {
   sub: string;
@@ -12,15 +13,18 @@ type DecodedToken = {
 
 interface LoginProps {
   goToRegister: () => void;
+  onLogin: () => void;
 }
 
-export default function Login({ goToRegister }: LoginProps) {
-  // save email and password in state
+export default function Login({ goToRegister, onLogin }: LoginProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  // Login function
 const handleLogin = async () => {
+  setError("");
+  setLoading(true);
   try {
     const response = await login({ email, password });
     const token = response.access_token ?? response.token;
@@ -31,14 +35,20 @@ const handleLogin = async () => {
     localStorage.setItem("role", decoded.role);
     localStorage.setItem("user", JSON.stringify(decoded));
 
-    if (decoded.role === "ADMIN") {
-      window.location.href = "/admin";
-    } else {
-      window.location.href = "/user";
-    }
+    onLogin();
   } catch (error) {
     console.error(error);
-    alert("Login failed");
+    if (error instanceof AxiosError) {
+      if (!error.response) {
+        setError("Cannot connect to server. Is the backend running?");
+      } else {
+        setError(error.response.data?.detail ?? "Invalid email or password.");
+      }
+    } else {
+      setError("Login failed. Please try again.");
+    }
+  } finally {
+    setLoading(false);
   }
 };
 
@@ -72,17 +82,18 @@ const handleLogin = async () => {
             />
           </div>
 
-          <div className="login-link-row">
-            <button type="button" className="login-link">
-              Forgot password?
-            </button>
-          </div>
+          {error && <p className="login-error">{error}</p>}
 
-          <button type="submit" className="login-submit" onClick={(e) => {
-            e.preventDefault();
-            handleLogin();
-          }}>
-            Sign in
+          <button
+            type="submit"
+            className="login-submit"
+            disabled={loading}
+            onClick={(e) => {
+              e.preventDefault();
+              handleLogin();
+            }}
+          >
+            {loading ? "Signing in..." : "Sign in"}
           </button>
         </form>
 

@@ -45,3 +45,28 @@ export const register = async (params: any) => {
   const res = await axiosInstance.post("/register", params);
   return res.data;
 };
+
+export const get_users = async (params?: any) => {
+  const res = await axiosInstance.get("/users", { params });
+  return res.data;
+};
+
+export const get_user_detail = async (userId: string, year: number) => {
+  const res = await axiosInstance.get(`/users/${userId}`, { params: { year } });
+  return res.data;
+};
+
+export const create_user = async (params: any) => {
+  const res = await axiosInstance.post("/users", params);
+  return res.data;
+};
+
+export const update_user = async (userId: string, params: any) => {
+  const res = await axiosInstance.put(`/users/${userId}`, params);
+  return res.data;
+};
+
+export const delete_user = async (userId: string) => {
+  const res = await axiosInstance.delete(`/users/${userId}`);
+  return res.data;
+};
