@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import "./Menu.css";
 
 interface MenuProps {
@@ -8,7 +9,7 @@ interface MenuProps {
 
 const Menu = ({ setTab, tab, onLogout }: MenuProps) => {
   const tabs = ["Logbook", "Trend"];
-
+  const navigate = useNavigate();
   return (
     <div className="menu-shell">
       <div className="menu-brand">Expense Tracker</div>
@@ -26,7 +27,10 @@ const Menu = ({ setTab, tab, onLogout }: MenuProps) => {
       </div>
       <button
         className="menu-logout"
-        onClick={onLogout}
+        onClick={() => {
+          onLogout();
+          navigate("/login");
+        }}
         type="button"
       >
         Logout

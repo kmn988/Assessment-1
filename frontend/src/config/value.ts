@@ -51,3 +51,10 @@ export const COLS: { label: string; key: SortKey }[] = [
   { label: "Date", key: "date" },
   { label: "Amount", key: "amount" },
 ];
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+}

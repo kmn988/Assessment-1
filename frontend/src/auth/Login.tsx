@@ -1,47 +1,42 @@
 import { useState } from "react";
 import "./Login.css";
 import { login } from "../config/api";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
+import { useNavigate } from "react-router-dom";
 
 type DecodedToken = {
   sub: string;
   email: string;
   exp: number;
-  role:"ADMIN" | "USER";
+  role: "ADMIN" | "USER";
 };
 
-interface LoginProps {
-  goToRegister: () => void;
-}
-
-export default function Login({ goToRegister }: LoginProps) {
+export default function Login() {
   // save email and password in state
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
+  const navigate = useNavigate();
   // Login function
-const handleLogin = async () => {
-  try {
-    const response = await login({ email, password });
-    const token = response.access_token ?? response.token;
+  const handleLogin = async () => {
+    try {
+      const response = await login({ email, password });
+      const token = response.access_token ?? response.token;
 
-    const decoded = jwtDecode<DecodedToken>(token);
+      const decoded = jwtDecode<DecodedToken>(token);
 
-    localStorage.setItem("token", token);
-    localStorage.setItem("role", decoded.role);
-    localStorage.setItem("user", JSON.stringify(decoded));
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(decoded));
 
-    if (decoded.role === "ADMIN") {
-      window.location.href = "/admin";
-    } else {
-      window.location.href = "/user";
+      if (decoded.role === "ADMIN") {
+        navigate("/admin");
+      } else {
+        navigate("/");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Login failed");
     }
-  } catch (error) {
-    console.error(error);
-    alert("Login failed");
-  }
-};
-
+  };
 
   return (
     <div className="login-page">
@@ -78,23 +73,29 @@ const handleLogin = async () => {
             </button>
           </div>
 
-          <button type="submit" className="login-submit" onClick={(e) => {
-            e.preventDefault();
-            handleLogin();
-          }}>
+          <button
+            type="submit"
+            className="login-submit"
+            onClick={(e) => {
+              e.preventDefault();
+              handleLogin();
+            }}
+          >
             Sign in
           </button>
         </form>
 
         <p className="login-footer">
           No account?{" "}
-          <button type="button" className="login-footer-link" onClick={goToRegister}>
+          <button
+            type="button"
+            className="login-footer-link"
+            onClick={() => navigate("/register")}
+          >
             Create one
           </button>
         </p>
       </div>
     </div>
   );
-
-
 }

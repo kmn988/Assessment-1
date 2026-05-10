@@ -2,17 +2,14 @@ import { useState } from "react";
 import { AxiosError } from "axios";
 import { register } from "../config/api";
 import "./Register.css";
+import { useNavigate } from "react-router-dom";
 
-interface RegisterProps {
-  goToLogin: () => void;
-}
-
-export default function Register({ goToLogin }: RegisterProps) {
+export default function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-
+  const navigate = useNavigate();
   const handleRegister = async () => {
     if (password !== confirmPassword) {
       alert("Passwords do not match");
@@ -27,7 +24,7 @@ export default function Register({ goToLogin }: RegisterProps) {
       });
 
       alert("Registration successful");
-      goToLogin();
+      navigate("/login");
     } catch (error) {
       console.error(error);
       if (error instanceof AxiosError) {
@@ -106,7 +103,10 @@ export default function Register({ goToLogin }: RegisterProps) {
           </button>
         </form>
 
-        <button onClick={goToLogin} className="register-back-button">
+        <button
+          onClick={() => navigate("/login")}
+          className="register-back-button"
+        >
           Back to login
         </button>
       </div>
