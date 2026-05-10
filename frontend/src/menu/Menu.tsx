@@ -8,7 +8,10 @@ interface MenuProps {
 }
 
 const Menu = ({ setTab, tab, onLogout }: MenuProps) => {
-  const tabs = ["Logbook", "Trend"];
+  const userTabs = ["Logbook", "Trend"];
+  const adminTabs = ["Users"];
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const tabs = user.role === "ADMIN" ? adminTabs : userTabs;
   const navigate = useNavigate();
   return (
     <div className="menu-shell">

@@ -28,20 +28,7 @@ const EMPTY_FORM: FormData = {
   role: "USER",
 };
 
-function getInitials(name: string): string {
-  return name
-    .split(" ")
-    .map((w) => w[0] ?? "")
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
-}
-
-interface AdminScreenProps {
-  onLogout: () => void;
-}
-
-export default function AdminScreen({ onLogout }: AdminScreenProps) {
+export default function AdminScreen() {
   const [users, setUsers] = useState<ApiUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState("");
@@ -61,11 +48,6 @@ export default function AdminScreen({ onLogout }: AdminScreenProps) {
   const navigate = useNavigate();
   const adminRaw = localStorage.getItem("user");
   const adminData = adminRaw ? JSON.parse(adminRaw) : null;
-  const currentAdmin = {
-    name: adminData?.name ?? "Admin",
-    email: adminData?.email ?? "",
-    initials: getInitials(adminData?.name ?? "Admin"),
-  };
 
   const fetchUsers = async () => {
     try {
@@ -170,49 +152,8 @@ export default function AdminScreen({ onLogout }: AdminScreenProps) {
   const updateField = (field: keyof FormData, value: string) =>
     setFormData((prev) => ({ ...prev, [field]: value }));
 
-  if (selectedUser) {
-    return (
-      <UserDetail
-        userId={selectedUser.id}
-        onBack={() => setSelectedUserId(null)}
-        adminName={currentAdmin.name}
-        adminEmail={currentAdmin.email}
-        adminInitials={currentAdmin.initials}
-      />
-    );
-  }
-
   return (
-    <div className="admin-screen">
-      <aside className="admin-sidebar">
-        <div className="admin-brand">Expense Tracker</div>
-        <nav className="admin-nav">
-          <button
-            className="admin-nav-item admin-nav-item-active"
-            type="button"
-          >
-            Users
-          </button>
-        </nav>
-        <div className="admin-profile">
-          <div className="admin-profile-avatar">{currentAdmin.initials}</div>
-          <div className="admin-profile-copy">
-            <p className="admin-profile-name">{currentAdmin.name}</p>
-            <p className="admin-profile-email">{currentAdmin.email}</p>
-          </div>
-        </div>
-        <button
-          className="admin-logout"
-          type="button"
-          onClick={() => {
-            onLogout();
-            navigate("/login");
-          }}
-        >
-          Logout
-        </button>
-      </aside>
-
+    <div className="admin-screen w-full">
       <main className="admin-main">
         <div className="admin-toolbar">
           <h1 className="admin-title">Users</h1>
@@ -257,7 +198,7 @@ export default function AdminScreen({ onLogout }: AdminScreenProps) {
               <div
                 className="admin-table admin-row admin-row-clickable"
                 key={user.id}
-                onClick={() => setSelectedUserId(user.id)}
+                onClick={() => navigate(`/admin/users/${user.id}`)}
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) =>
@@ -272,7 +213,7 @@ export default function AdminScreen({ onLogout }: AdminScreenProps) {
                         : "admin-user-avatar-green"
                     }`}
                   >
-                    {getInitials(user.name)}
+                    {/* {getInitials(user.name)} */}
                   </div>
                   <span className="admin-user-name">{user.name}</span>
                 </div>

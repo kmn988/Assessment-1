@@ -1,7 +1,5 @@
 .admin-screen {
   min-height: 100vh;
-  display: grid;
-  grid-template-columns: 200px minmax(0, 1fr);
   background: #111827;
   color: #f9fafb;
   font-family: system-ui, "Segoe UI", Roboto, sans-serif;

@@ -12,17 +12,19 @@ type ApiUser = {
 type Trend = Record<string, number>;
 type Categories = Record<string, number>;
 
-type UserDetailProps = {
-  userId: string;
-  onBack: () => void;
-  adminName: string;
-  adminEmail: string;
-  adminInitials: string;
-};
-
 const MONTH_LABELS = [
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
 ];
 
 function getInitials(name: string): string {
@@ -34,21 +36,18 @@ function getInitials(name: string): string {
     .slice(0, 2);
 }
 
-export default function UserDetail({
-  userId,
-  onBack,
-  adminName,
-  adminEmail,
-  adminInitials,
-}: UserDetailProps) {
+export default function UserDetail() {
   const [user, setUser] = useState<ApiUser | null>(null);
   const [trend, setTrend] = useState<Trend>({});
   const [categories, setCategories] = useState<Categories>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
+  const userId = window.location.pathname.split("/").pop() ?? "";
   const year = new Date().getFullYear();
-
+  const { name: adminName, email: adminEmail } = JSON.parse(
+    localStorage.getItem("user") ?? "{}",
+  );
+  const adminInitials = getInitials(adminName);
   useEffect(() => {
     setLoading(true);
     setError("");
@@ -65,55 +64,35 @@ export default function UserDetail({
   const trendEntries = Object.entries(trend);
   const trendValues = trendEntries.map(([, v]) => v);
   const totalSpend = trendValues.reduce((a, b) => a + b, 0);
-  const monthlyAvg = trendValues.length > 0 ? totalSpend / trendValues.length : 0;
+  const monthlyAvg =
+    trendValues.length > 0 ? totalSpend / trendValues.length : 0;
   const maxTrend = Math.max(...trendValues, 1);
 
   const thisMonthKey = `${year}-${String(new Date().getMonth() + 1).padStart(2, "0")}`;
   const thisMonthSpend = trend[thisMonthKey] ?? 0;
 
-  const sidebar = (
-    <aside className="admin-sidebar">
-      <div className="admin-brand">Expense Tracker</div>
-      <nav className="admin-nav">
-        <button
-          className="admin-nav-item admin-nav-item-active"
-          type="button"
-          onClick={onBack}
-        >
-          Users
-        </button>
-      </nav>
-      <div className="admin-profile">
-        <div className="admin-profile-avatar">{adminInitials}</div>
-        <div className="admin-profile-copy">
-          <p className="admin-profile-name">{adminName}</p>
-          <p className="admin-profile-email">{adminEmail}</p>
-        </div>
-      </div>
-    </aside>
-  );
-
   if (loading || error || !user) {
     return (
       <div className="admin-screen">
-        {sidebar}
         <main className="admin-main">
-          <p className="admin-status-msg">{loading ? "Loading..." : error || "User not found."}</p>
+          <p className="admin-status-msg">
+            {loading ? "Loading..." : error || "User not found."}
+          </p>
         </main>
       </div>
     );
   }
 
   const avatarClass =
-    user.role === "ADMIN" ? "admin-user-avatar-gold" : "admin-user-avatar-green";
+    user.role === "ADMIN"
+      ? "admin-user-avatar-gold"
+      : "admin-user-avatar-green";
 
   return (
-    <div className="admin-screen">
-      {sidebar}
-
-      <main className="admin-main">
+    <div className="admin-screen w-full col-span-1">
+      <div className="admin-main w-full">
         <div className="admin-breadcrumbs">
-          <button type="button" className="admin-breadcrumb-link" onClick={onBack}>
+          <button type="button" className="admin-breadcrumb-link">
             Users
           </button>
           <span className="admin-breadcrumb-sep">/</span>
@@ -174,7 +153,9 @@ export default function UserDetail({
                 const pct = (value / maxTrend) * 100;
                 return (
                   <div key={key} className="user-detail-bar-col">
-                    <span className="user-detail-bar-value">${value.toFixed(0)}</span>
+                    <span className="user-detail-bar-value">
+                      ${value.toFixed(0)}
+                    </span>
                     <div className="user-detail-bar-track">
                       <div
                         className="user-detail-bar-fill"
@@ -192,40 +173,47 @@ export default function UserDetail({
         </section>
 
         <section className="user-detail-panel">
-          <h3 className="user-detail-panel-title">Spend by category — {year}</h3>
+          <h3 className="user-detail-panel-title">
+            Spend by category — {year}
+          </h3>
           {Object.keys(categories).length === 0 ? (
             <div className="user-detail-empty">No category data for {year}</div>
-          ) : (() => {
-            const catTotal = Object.values(categories).reduce((a, b) => a + b, 0);
-            return (
-              <div className="user-detail-category-list">
-                {Object.entries(categories).map(([cat, amount]) => {
-                  const pct = catTotal > 0 ? (amount / catTotal) * 100 : 0;
-                  return (
-                    <div key={cat} className="user-detail-category-row">
-                      <div className="user-detail-category-head">
-                        <span>{cat}</span>
-                        <span className="user-detail-category-meta">
-                          ${amount.toFixed(2)}
-                          <span className="user-detail-category-pct">
-                            {pct.toFixed(1)}%
+          ) : (
+            (() => {
+              const catTotal = Object.values(categories).reduce(
+                (a, b) => a + b,
+                0,
+              );
+              return (
+                <div className="user-detail-category-list">
+                  {Object.entries(categories).map(([cat, amount]) => {
+                    const pct = catTotal > 0 ? (amount / catTotal) * 100 : 0;
+                    return (
+                      <div key={cat} className="user-detail-category-row">
+                        <div className="user-detail-category-head">
+                          <span>{cat}</span>
+                          <span className="user-detail-category-meta">
+                            ${amount.toFixed(2)}
+                            <span className="user-detail-category-pct">
+                              {pct.toFixed(1)}%
+                            </span>
                           </span>
-                        </span>
+                        </div>
+                        <div className="user-detail-category-track">
+                          <div
+                            className="user-detail-category-fill"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
                       </div>
-                      <div className="user-detail-category-track">
-                        <div
-                          className="user-detail-category-fill"
-                          style={{ width: `${pct}%` }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            );
-          })()}
+                    );
+                  })}
+                </div>
+              );
+            })()
+          )}
         </section>
-      </main>
+      </div>
     </div>
   );
 }

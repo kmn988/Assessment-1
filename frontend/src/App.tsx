@@ -8,6 +8,7 @@ import type { User } from "./config/value";
 import ExpenseTable from "./logbook/ExpenseTable";
 import Menu from "./menu/Menu";
 import TrendChart from "./trend/Trend";
+import UserDetail from "./UserDetail";
 
 function App() {
   const [tab, setTab] = useState(0);
@@ -38,7 +39,10 @@ function App() {
           path="/admin"
           element={
             <ProtectedAdminRoute>
-              <AdminScreen onLogout={handleLogout} />
+              <div className="flex flex-col md:flex-row w-full">
+                <Menu setTab={setTab} tab={tab} onLogout={handleLogout} />
+                {tab === 0 && <AdminScreen />}
+              </div>
             </ProtectedAdminRoute>
           }
         />
@@ -46,7 +50,10 @@ function App() {
           path="/admin/users/:id"
           element={
             <ProtectedAdminRoute>
-              <AdminScreen onLogout={handleLogout} />
+              <div className="flex flex-col md:flex-row w-full">
+                <Menu setTab={setTab} tab={tab} onLogout={handleLogout} />
+                {tab === 0 && <UserDetail />}
+              </div>
             </ProtectedAdminRoute>
           }
         />
@@ -60,13 +67,7 @@ export default App;
 
 const ProtectedRoute = ({ children }: any) => {
   const user: User = JSON.parse(localStorage.getItem("user") || "{}");
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  } else if (user.role === "ADMIN") {
-    return <Navigate to="/admin" replace />;
-  } else {
-    return children;
-  }
+  return !user ? <Navigate to="/login" replace /> : children;
 };
 
 const ProtectedAdminRoute = ({ children }: any) => {
