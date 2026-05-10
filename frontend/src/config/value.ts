@@ -44,6 +44,7 @@ export type SortKey = keyof Pick<
   Expense,
   "title" | "category" | "date" | "amount"
 >;
+export type UserSortKey = keyof Pick<User, "name" | "email" | "role">;
 export type SortDir = "asc" | "desc";
 export const COLS: { label: string; key: SortKey }[] = [
   { label: "Title / Description", key: "title" },
@@ -52,6 +53,11 @@ export const COLS: { label: string; key: SortKey }[] = [
   { label: "Amount", key: "amount" },
 ];
 
+export const USER_COLS: { label: string; key: UserSortKey }[] = [
+  { label: "Name", key: "name" },
+  { label: "Email", key: "email" },
+  { label: "Role", key: "role" },
+];
 export interface User {
   id: string;
   name: string;

@@ -10,7 +10,7 @@ import { COLS, PAGE_SIZE, type SortDir, type SortKey } from "../config/value";
 import CategoryBreakdown from "./CategoryBreakdown";
 import CategorySelector from "./CategorySelector";
 import ChangeAction from "./ChangeAction";
-import DeleteAction from "./DeleteAction";
+import DeleteAction from "../common/DeleteAction";
 import DonutChart from "./DonutChart";
 import MonthSelector from "./MonthSelector";
 import TableBase from "../common/TableBase";
@@ -170,7 +170,7 @@ const ExpenseTable = () => {
                 <input
                   type="text"
                   placeholder="Search expenses"
-                  className="px-2 border-solid border-2 rounded-2xl h-fit"
+                  className="px-2 border-solid border-2 rounded-lg h-fit"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
@@ -243,7 +243,8 @@ const ExpenseTable = () => {
                 <DeleteAction
                   isOpen={showDeleteModal}
                   onClose={() => setShowDeleteModal(false)}
-                  expense={selectedExpense}
+                  title={`Delete ${selectedExpense?.title} Expense?`}
+                  description="Are you sure you want to delete this expense?"
                   onConfirm={handleDelete}
                 />
               </>

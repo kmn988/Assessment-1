@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import "./AdminScreen.css";
-import { get_user_detail } from "./config/api";
+import { get_user_detail } from "../config/api";
 
 type ApiUser = {
   id: string;
