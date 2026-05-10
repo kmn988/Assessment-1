@@ -161,6 +161,7 @@ const ExpenseTable = () => {
         <MonthSelector value={period} onChange={(value) => setPeriod(value)} />
         <div className="grid grid-cols-1 md:grid-cols-3 m-3 md:m-7 gap-4 md:gap-7">
           <TableBase
+            className="col-span-1 md:col-span-2 bg-gray-800 flex flex-col rounded-xl border-2 border-solid"
             filterComponent={
               <div className="flex flex-col sm:flex-row flex-wrap p-4 h-auto gap-3 justify-between items-start sm:items-center">
                 <div className="flex flex-wrap gap-2 ">

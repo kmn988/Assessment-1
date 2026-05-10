@@ -5,8 +5,10 @@ interface TableProps extends PaginationProps {
   filterComponent?: React.ReactNode;
   headerComponent: React.ReactNode;
   bodyComponent: React.ReactNode;
+  className?: string;
 }
 const TableBase = ({
+  className,
   filterComponent,
   headerComponent,
   bodyComponent,
@@ -16,7 +18,7 @@ const TableBase = ({
   totalPages,
 }: TableProps) => {
   return (
-    <div className="col-span-1 md:col-span-2 bg-gray-800 flex flex-col rounded-xl border-2 border-solid">
+    <div className={className}>
       {filterComponent}
       <div className="flex flex-col h-full justify-between">
         <div className="overflow-x-auto">
