@@ -74,6 +74,7 @@ const ExpenseTable = () => {
         setShowEditModal(true);
         setSelectedExpense(item);
       },
+      style: "bg-main hover:bg-hover",
     },
     {
       title: "Delete",
@@ -81,6 +82,7 @@ const ExpenseTable = () => {
         setShowDeleteModal(true);
         setSelectedExpense(item);
       },
+      style: "bg-red-300 hover:bg-red-400",
     },
   ];
   const fetchExpenses = async () => {
@@ -221,7 +223,7 @@ const ExpenseTable = () => {
                           {actionButtons.map((button) => (
                             <div key={button.title}>
                               <button
-                                className="border-solid border-2 rounded-full px-2 hover:cursor-pointer"
+                                className={`border-solid border-2 rounded-lg px-2 hover:cursor-pointer text-black ${button.style}`}
                                 onClick={() => button.action(item)}
                               >
                                 {button.title}

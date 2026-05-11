@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import Modal from "../Modal";
+import { validateEmail, validatePassword } from "../config/helper";
 
 interface CreateUserActionProps {
   isOpen: boolean;
@@ -43,33 +44,50 @@ const CreateUserAction = ({
     const newErrors: any = {};
 
     if (!form.name.trim()) newErrors.name = "Full name is required";
-    if (!form.email.trim()) newErrors.email = "Email is required";
-    if (!form.password.trim()) {
-      newErrors.password = "Password is required";
-    } else {
-      if (!/\d/.test(form.password))
-        newErrors.password = "Password must contain at least one digit";
-      else if (!/[A-Z]/.test(form.password))
-        newErrors.password =
-          "Password must contain at least one uppercase letter";
-      else if (!/[a-z]/.test(form.password))
-        newErrors.password =
-          "Password must contain at least one lowercase letter";
-      else if (!/[!@#$%^&*(),.?":{}|<>]/.test(form.password))
-        newErrors.password =
-          "Password must contain at least one special character";
-    }
+
+    const emailError = validateEmail(form.email);
+    if (emailError) newErrors.email = emailError;
+
+    const passwordError = validatePassword(form.password);
+    if (passwordError) newErrors.password = passwordError;
+
     if (!form.confirmPassword.trim()) {
       newErrors.confirmPassword = "Please confirm your password";
     } else if (form.password !== form.confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match";
     }
+
     if (!form.role) newErrors.role = "Role is required";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
+  const handleEmailChange = (value: string) => {
+    set("email", value);
+    const emailError = validateEmail(value);
+    if (emailError) {
+      setErrors((e) => ({ ...e, email: emailError }));
+    } else {
+      setErrors((e) => ({ ...e, email: "" }));
+    }
+  };
+  const handlePasswordChange = (value: string) => {
+    set("password", value);
+
+    const passwordError = validatePassword(value);
+    if (passwordError) {
+      setErrors((e) => ({ ...e, password: passwordError }));
+    } else {
+      setErrors((e) => ({ ...e, password: "" }));
+    }
+
+    if (form.confirmPassword && form.confirmPassword !== value) {
+      setErrors((e) => ({ ...e, confirmPassword: "Passwords do not match" }));
+    } else if (form.confirmPassword === value) {
+      setErrors((e) => ({ ...e, confirmPassword: "" }));
+    }
+  };
   const handleSubmit = () => {
     if (!validate()) return;
     const { confirmPassword, ...submitForm } = form;
@@ -124,7 +142,7 @@ const CreateUserAction = ({
               type="email"
               placeholder="john@example.com"
               value={form.email}
-              onChange={(e) => set("email", e.target.value)}
+              onChange={(e) => handleEmailChange(e.target.value)}
             />
             {errors.email && (
               <span className="text-xs text-red-400">{errors.email}</span>
@@ -139,7 +157,7 @@ const CreateUserAction = ({
               placeholder="Min 8 chars, 1 upper, 1 digit, 1 special"
               autoComplete="new-password"
               value={form.password}
-              onChange={(e) => set("password", e.target.value)}
+              onChange={(e) => handlePasswordChange(e.target.value)}
             />
             {errors.password && (
               <span className="text-xs text-red-400">{errors.password}</span>

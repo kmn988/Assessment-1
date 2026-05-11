@@ -73,6 +73,8 @@ async def login(
 
 @app.post("/register")
 async def register(body: RegisterRequest, db: Session = Depends(get_session)):
+    if db.exec(select(Users).where(Users.email == body.email)).first():
+        raise HTTPException(status_code=400, detail="Email already registered")
     db_user = Users(
         email=body.email,
         password=get_password_hash(body.password),

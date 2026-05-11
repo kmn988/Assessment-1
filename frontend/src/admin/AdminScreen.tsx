@@ -1,7 +1,4 @@
-import { AxiosError } from "axios";
-import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import "./AdminScreen.css";
+import { useEffect, useState } from "react";
 import TableBase from "../common/TableBase";
 import {
   create_user,
@@ -15,9 +12,11 @@ import {
   type SortDir,
   type UserSortKey,
 } from "../config/value";
+import "./AdminScreen.css";
 
 import DeleteAction from "../common/DeleteAction";
 import CreateUserAction from "./CreateUserAction";
+import EditUserAction from "./EditUserAction";
 
 export type ApiUser = {
   id: string;
@@ -26,39 +25,9 @@ export type ApiUser = {
   role: "ADMIN" | "USER";
 };
 
-type ModalMode = "create" | "edit" | null;
-
-type FormData = {
-  name: string;
-  email: string;
-  password: string;
-  role: "ADMIN" | "USER";
-};
-
-const EMPTY_FORM: FormData = {
-  name: "",
-  email: "",
-  password: "",
-  role: "USER",
-};
-
 export default function AdminScreen() {
   const [users, setUsers] = useState<ApiUser[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [fetchError, setFetchError] = useState("");
-
   const [search, setSearch] = useState("");
-  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
-
-  const [modalMode, setModalMode] = useState<ModalMode>(null);
-  const [editUserId, setEditUserId] = useState<string | null>(null);
-  const [formData, setFormData] = useState<FormData>(EMPTY_FORM);
-  const [formError, setFormError] = useState("");
-  const [formLoading, setFormLoading] = useState(false);
-
-  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
-  const [deleteLoading, setDeleteLoading] = useState(false);
-  const [deleteError, setDeleteError] = useState("");
   const [sort, setSort] = useState<{ key: UserSortKey; dir: SortDir } | null>(
     null,
   );
@@ -67,10 +36,8 @@ export default function AdminScreen() {
   const [total, setTotal] = useState(0);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<ApiUser | null>(null);
-
-  const navigate = useNavigate();
-  const adminRaw = localStorage.getItem("user");
 
   const toggleSort = (key: UserSortKey) => {
     setSort((prev) =>
@@ -91,55 +58,40 @@ export default function AdminScreen() {
     setTotalPages(response.pages);
     setTotal(response.total);
   };
-
-  const handleSubmit = async () => {
-    setFormError("");
-    setFormLoading(true);
-    try {
-      if (modalMode === "create") {
-        await create_user(formData);
-      } else {
-        await update_user(editUserId!, {
-          name: formData.name,
-          email: formData.email,
-          role: formData.role,
-        });
-      }
-      await fetchUsers();
-    } catch (err) {
-      if (err instanceof AxiosError) {
-        setFormError(err.response?.data?.detail ?? "Operation failed.");
-      } else {
-        setFormError("Operation failed.");
-      }
-    } finally {
-      setFormLoading(false);
-    }
+  const handleEdit = async (item: ApiUser) => {
+    await update_user(item.id, {
+      name: item.name,
+      email: item.email,
+    });
+    await fetchUsers();
   };
+  const handleSubmit = async (item: any) => {
+    await create_user(item);
+    await fetchUsers();
+  };
+
   const actionButtons = [
+    {
+      title: "Edit",
+      action: (item: ApiUser) => {
+        setShowEditModal(true);
+        setSelectedUser(item);
+      },
+      style: "bg-main hover:bg-hover",
+    },
     {
       title: "Delete",
       action: (item: ApiUser) => {
         setShowDeleteModal(true);
         setSelectedUser(item);
       },
+      style: "bg-red-300 hover:bg-red-400",
     },
   ];
 
   const handleDelete = async () => {
-    if (!deleteTargetId) return;
-    setDeleteLoading(true);
-    setDeleteError("");
-    try {
-      await delete_user(deleteTargetId);
-      if (selectedUserId === deleteTargetId) setSelectedUserId(null);
-      setDeleteTargetId(null);
-      await fetchUsers();
-    } catch {
-      setDeleteError("Failed to delete user. Please try again.");
-    } finally {
-      setDeleteLoading(false);
-    }
+    await delete_user(selectedUser!.id);
+    await fetchUsers();
   };
 
   useEffect(() => {
@@ -211,7 +163,7 @@ export default function AdminScreen() {
                         {actionButtons.map((button) => (
                           <div key={button.title}>
                             <button
-                              className="border-solid border-2 rounded-full px-2 hover:cursor-pointer"
+                              className={`border-solid border-2 rounded-lg px-2 hover:cursor-pointer text-black ${button.style}`}
                               onClick={() => button.action(item)}
                             >
                               {button.title}
@@ -244,6 +196,12 @@ export default function AdminScreen() {
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         onSubmit={handleSubmit}
+      />
+      <EditUserAction
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        user={selectedUser}
+        onSubmit={handleEdit}
       />
       {/* Create / Edit modal */}
     </div>
