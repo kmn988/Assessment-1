@@ -1,6 +1,12 @@
 import { useState } from "react";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import AdminScreen from "./AdminScreen";
+import {
+  BrowserRouter,
+  Navigate,
+  Outlet,
+  Route,
+  Routes,
+} from "react-router-dom";
+import AdminScreen from "./admin/AdminScreen";
 import "./App.css";
 import Login from "./auth/Login";
 import Register from "./auth/Register";
@@ -8,55 +14,33 @@ import type { User } from "./config/value";
 import ExpenseTable from "./logbook/ExpenseTable";
 import Menu from "./menu/Menu";
 import TrendChart from "./trend/Trend";
-import UserDetail from "./UserDetail";
+import UserDetail from "./admin/UserDetail";
 
 function App() {
-  const [tab, setTab] = useState(0);
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    setTab(0);
-  };
-
   return (
     <BrowserRouter>
       <Routes>
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <div className="flex flex-col md:flex-row w-full">
-                <Menu setTab={setTab} tab={tab} onLogout={handleLogout} />
-                {tab === 0 && <ExpenseTable />}
-                {tab === 1 && <TrendChart />}
-              </div>
-            </ProtectedRoute>
-          }
-        />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route
-          path="/admin"
-          element={
-            <ProtectedAdminRoute>
-              <div className="flex flex-col md:flex-row w-full">
-                <Menu setTab={setTab} tab={tab} onLogout={handleLogout} />
-                {tab === 0 && <AdminScreen />}
-              </div>
-            </ProtectedAdminRoute>
-          }
-        />
-        <Route
-          path="/admin/users/:id"
-          element={
-            <ProtectedAdminRoute>
-              <div className="flex flex-col md:flex-row w-full">
-                <Menu setTab={setTab} tab={tab} onLogout={handleLogout} />
-                {tab === 0 && <UserDetail />}
-              </div>
-            </ProtectedAdminRoute>
-          }
-        />
+
+        <Route element={<ProtectedRoute />}>
+          <Route
+            path="/"
+            element={<AppLayout tabs={[<ExpenseTable />, <TrendChart />]} />}
+          />
+        </Route>
+
+        <Route element={<ProtectedAdminRoute />}>
+          <Route
+            path="/admin"
+            element={<AppLayout tabs={[<AdminScreen />]} />}
+          />
+          <Route
+            path="/admin/users/:id"
+            element={<AppLayout tabs={[<UserDetail />]} />}
+          />
+        </Route>
+
         <Route path="*" element={<NoMatch />} />
       </Routes>
     </BrowserRouter>
@@ -64,15 +48,17 @@ function App() {
 }
 
 export default App;
-
-const ProtectedRoute = ({ children }: any) => {
-  const user: User = JSON.parse(localStorage.getItem("user") || "{}");
-  return !user ? <Navigate to="/login" replace /> : children;
+const getUser = (): User => {
+  return JSON.parse(localStorage.getItem("user") || "null");
+};
+const ProtectedRoute = () => {
+  const user = getUser();
+  return user ? <Outlet /> : <Navigate to="/login" replace />;
 };
 
-const ProtectedAdminRoute = ({ children }: any) => {
-  const user: User = JSON.parse(localStorage.getItem("user") || "{}");
-  return user?.role !== "ADMIN" ? <Navigate to="/login" replace /> : children;
+const ProtectedAdminRoute = () => {
+  const user = getUser();
+  return user?.role === "ADMIN" ? <Outlet /> : <Navigate to="/login" replace />;
 };
 
 function NoMatch() {
@@ -82,3 +68,19 @@ function NoMatch() {
     </div>
   );
 }
+
+const AppLayout = ({ tabs }: { tabs: React.ReactNode[] }) => {
+  const [tab, setTab] = useState(0);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+  };
+
+  return (
+    <div className="flex flex-col md:flex-row w-full">
+      <Menu setTab={setTab} tab={tab} onLogout={handleLogout} />
+      {tabs[tab]}
+    </div>
+  );
+};

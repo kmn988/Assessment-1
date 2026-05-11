@@ -13,7 +13,6 @@ type DecodedToken = {
 };
 
 export default function Login() {
-  // save email and password in state
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
@@ -26,19 +25,15 @@ export default function Login() {
     try {
       const response = await login({ email, password });
       const token = response.access_token ?? response.token;
-
       const decoded = jwtDecode<DecodedToken>(token);
-
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(decoded));
-
-      if (decoded.role === "ADMIN") {
+      if (decoded && decoded.role === "ADMIN") {
         navigate("/admin");
       } else {
         navigate("/");
       }
     } catch (error) {
-      console.error(error);
       if (error instanceof AxiosError) {
         if (!error.response) {
           setError("Cannot connect to server. Is the backend running?");

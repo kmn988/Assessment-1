@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import "./AdminScreen.css";
-import { get_user_detail } from "./config/api";
-import { CATEGORIES, COLORS } from "./config/value";
-import BarChart from "./trend/BarChart";
+import { get_user_detail } from "../config/api";
+import { CATEGORIES, COLORS } from "../config/value";
+import BarChart from "../trend/BarChart";
 
 type ApiUser = {
   id: string;
@@ -170,7 +170,10 @@ export default function UserDetail() {
                         <div className="user-detail-category-track">
                           <div
                             className="user-detail-category-fill"
-                            style={{ width: `${pct}%`, backgroundColor: color }}
+                            style={{
+                              width: `${pct}%`,
+                              backgroundColor: color,
+                            }}
                           />
                         </div>
                       </div>

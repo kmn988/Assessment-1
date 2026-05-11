@@ -16,7 +16,7 @@ from expense_crud import (
 )
 from typing import Annotated
 from sqlmodel import Session
-from expense_tracker_crud import get_session
+from db_connection import get_session
 import uuid
 
 CurrentUser = Annotated[UserDecoded, Depends(get_current_user)]

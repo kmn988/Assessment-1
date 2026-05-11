@@ -1,4 +1,4 @@
-import axios, { type AxiosInstance } from "axios";
+import axios, { AxiosError, type AxiosInstance } from "axios";
 
 const axiosInstance: AxiosInstance = axios.create({
   baseURL: "http://127.0.0.1:8000",
@@ -33,13 +33,18 @@ axiosInstance.interceptors.response.use(
   function onFulfilled(response) {
     return response;
   },
-  function onRejected(error) {
-    if (error.response?.status === 401) {
+  function onRejected(error: AxiosError) {
+    if (
+      error.response?.status === 401 &&
+      error.response?.config.url !== "/login" &&
+      error.response?.config.url !== "/register"
+    ) {
       // Token expired or invalid
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       window.location.href = "/login";
     }
+
     return Promise.reject(error);
   },
 );

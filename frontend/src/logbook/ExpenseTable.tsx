@@ -10,7 +10,7 @@ import { COLS, PAGE_SIZE, type SortDir, type SortKey } from "../config/value";
 import CategoryBreakdown from "./CategoryBreakdown";
 import CategorySelector from "./CategorySelector";
 import ChangeAction from "./ChangeAction";
-import DeleteAction from "./DeleteAction";
+import DeleteAction from "../common/DeleteAction";
 import DonutChart from "./DonutChart";
 import MonthSelector from "./MonthSelector";
 import TableBase from "../common/TableBase";
@@ -74,6 +74,7 @@ const ExpenseTable = () => {
         setShowEditModal(true);
         setSelectedExpense(item);
       },
+      style: "bg-main hover:bg-hover",
     },
     {
       title: "Delete",
@@ -81,6 +82,7 @@ const ExpenseTable = () => {
         setShowDeleteModal(true);
         setSelectedExpense(item);
       },
+      style: "bg-red-300 hover:bg-red-400",
     },
   ];
   const fetchExpenses = async () => {
@@ -170,7 +172,7 @@ const ExpenseTable = () => {
                 <input
                   type="text"
                   placeholder="Search expenses"
-                  className="px-2 border-solid border-2 rounded-2xl h-fit"
+                  className="px-2 border-solid border-2 rounded-lg h-fit"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
@@ -221,7 +223,7 @@ const ExpenseTable = () => {
                           {actionButtons.map((button) => (
                             <div key={button.title}>
                               <button
-                                className="border-solid border-2 rounded-full px-2 hover:cursor-pointer"
+                                className={`border-solid border-2 rounded-lg px-2 hover:cursor-pointer text-black ${button.style}`}
                                 onClick={() => button.action(item)}
                               >
                                 {button.title}
@@ -243,7 +245,8 @@ const ExpenseTable = () => {
                 <DeleteAction
                   isOpen={showDeleteModal}
                   onClose={() => setShowDeleteModal(false)}
-                  expense={selectedExpense}
+                  title={`Delete ${selectedExpense?.title} Expense?`}
+                  description="Are you sure you want to delete this expense?"
                   onConfirm={handleDelete}
                 />
               </>

@@ -1,16 +1,18 @@
 import Modal from "../Modal";
-import type { Expense } from "./ExpenseTable";
 
 interface DeleteActionProps {
   isOpen: boolean;
   onClose: () => void;
-  expense: Expense | null;
+  title: string;
+  description: string;
   onConfirm: () => void;
 }
 const DeleteAction = ({
   isOpen,
   onClose,
-  expense,
+  title,
+  description,
+
   onConfirm,
 }: DeleteActionProps) => {
   const actions = [
@@ -35,12 +37,8 @@ const DeleteAction = ({
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className="flex flex-col gap-4">
-        <p className="font-bold text-center">
-          Delete {expense?.title} Expense?
-        </p>
-        <p className="text-center">
-          Are you sure you want to delete this expense?
-        </p>
+        <p className="font-bold text-center">{title}</p>
+        <p className="text-center">{description}</p>
         <div className="flex gap-5 justify-center items-center">
           {actions.map((action) => (
             <button
