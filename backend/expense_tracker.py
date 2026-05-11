@@ -1,11 +1,10 @@
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from dependencies import get_current_user
+from db_connection import get_session
 from models.user_model import LoginRequest, Users, RegisterRequest, UserRole
-from expense_tracker_crud import (
+from security import (
     create_access_token,
     get_password_hash,
-    get_session,
     verify_password,
 )
 from fastapi_pagination import add_pagination

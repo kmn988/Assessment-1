@@ -7,7 +7,7 @@ from sqlmodel import (
     desc,
 )
 import uuid
-import bcrypt
+from security import get_password_hash
 from models.expense_model import CustomPage
 from models.user_model import (
     USER_SORT_COLUMNS,
@@ -60,8 +60,12 @@ async def db_get_user_detail(session: Session, user_id: str, year: int):
 async def db_create_user(session: Session, body: CreateUserRequest) -> Users:
     if session.exec(select(Users).where(Users.email == body.email)).first():
         raise HTTPException(status_code=400, detail="Email already exists")
-    hashed = bcrypt.hashpw(body.password.encode(), bcrypt.gensalt(12)).decode()
-    user = Users(email=body.email, password=hashed, role=body.role, name=body.name)
+    user = Users(
+        email=body.email,
+        password=get_password_hash(body.password),
+        role=body.role,
+        name=body.name,
+    )
     session.add(user)
     session.commit()
     session.refresh(user)
