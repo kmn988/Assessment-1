@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import "./AdminScreen.css";
 import { get_user_detail } from "../config/api";
+import { CATEGORIES, COLORS } from "../config/value";
+import BarChart from "../trend/BarChart";
 
 type ApiUser = {
   id: string;
@@ -11,21 +13,6 @@ type ApiUser = {
 
 type Trend = Record<string, number>;
 type Categories = Record<string, number>;
-
-const MONTH_LABELS = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
-];
 
 function getInitials(name: string): string {
   return name
@@ -44,10 +31,6 @@ export default function UserDetail() {
   const [error, setError] = useState("");
   const userId = window.location.pathname.split("/").pop() ?? "";
   const year = new Date().getFullYear();
-  const { name: adminName, email: adminEmail } = JSON.parse(
-    localStorage.getItem("user") ?? "{}",
-  );
-  const adminInitials = getInitials(adminName);
   useEffect(() => {
     setLoading(true);
     setError("");
@@ -66,8 +49,6 @@ export default function UserDetail() {
   const totalSpend = trendValues.reduce((a, b) => a + b, 0);
   const monthlyAvg =
     trendValues.length > 0 ? totalSpend / trendValues.length : 0;
-  const maxTrend = Math.max(...trendValues, 1);
-
   const thisMonthKey = `${year}-${String(new Date().getMonth() + 1).padStart(2, "0")}`;
   const thisMonthSpend = trend[thisMonthKey] ?? 0;
 
@@ -147,27 +128,8 @@ export default function UserDetail() {
           {trendEntries.length === 0 ? (
             <div className="user-detail-empty">No spending data for {year}</div>
           ) : (
-            <div className="user-detail-bar-grid">
-              {trendEntries.map(([key, value]) => {
-                const monthIdx = parseInt(key.split("-")[1] ?? "1") - 1;
-                const pct = (value / maxTrend) * 100;
-                return (
-                  <div key={key} className="user-detail-bar-col">
-                    <span className="user-detail-bar-value">
-                      ${value.toFixed(0)}
-                    </span>
-                    <div className="user-detail-bar-track">
-                      <div
-                        className="user-detail-bar-fill"
-                        style={{ height: `${pct}%` }}
-                      />
-                    </div>
-                    <span className="user-detail-bar-month">
-                      {MONTH_LABELS[monthIdx]}
-                    </span>
-                  </div>
-                );
-              })}
+            <div style={{ height: 260 }}>
+              <BarChart year={year} data={trend} />
             </div>
           )}
         </section>
@@ -186,12 +148,18 @@ export default function UserDetail() {
               );
               return (
                 <div className="user-detail-category-list">
-                  {Object.entries(categories).map(([cat, amount]) => {
+                  {Object.entries(categories).map(([cat, amount], i) => {
+                    const catName = cat.replace(/^Category\./, "");
                     const pct = catTotal > 0 ? (amount / catTotal) * 100 : 0;
+                    const colorIdx = CATEGORIES.indexOf(catName);
+                    const color =
+                      colorIdx >= 0
+                        ? COLORS[colorIdx]
+                        : COLORS[i % COLORS.length];
                     return (
                       <div key={cat} className="user-detail-category-row">
                         <div className="user-detail-category-head">
-                          <span>{cat}</span>
+                          <span>{catName}</span>
                           <span className="user-detail-category-meta">
                             ${amount.toFixed(2)}
                             <span className="user-detail-category-pct">
@@ -202,7 +170,10 @@ export default function UserDetail() {
                         <div className="user-detail-category-track">
                           <div
                             className="user-detail-category-fill"
-                            style={{ width: `${pct}%` }}
+                            style={{
+                              width: `${pct}%`,
+                              backgroundColor: color,
+                            }}
                           />
                         </div>
                       </div>
