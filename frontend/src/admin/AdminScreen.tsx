@@ -17,6 +17,7 @@ import "./AdminScreen.css";
 import DeleteAction from "../common/DeleteAction";
 import CreateUserAction from "./CreateUserAction";
 import EditUserAction from "./EditUserAction";
+import { useNavigate } from "react-router-dom";
 
 export type ApiUser = {
   id: string;
@@ -38,7 +39,7 @@ export default function AdminScreen() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<ApiUser | null>(null);
-
+  const navigate = useNavigate();
   const toggleSort = (key: UserSortKey) => {
     setSort((prev) =>
       prev?.key === key
@@ -145,7 +146,11 @@ export default function AdminScreen() {
           bodyComponent={
             <>
               {users.map((item) => (
-                <tr className=" border-t-2 h-20 border-solid" key={item.id}>
+                <tr
+                  className=" border-t-2 h-20 border-solid"
+                  key={item.id}
+                  onClick={() => navigate(`users/${item.id}`)}
+                >
                   <td className="p-3">
                     <div className=" flex flex-col justify-center gap-1">
                       <span>{item.name}</span>
