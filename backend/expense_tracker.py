@@ -77,7 +77,7 @@ async def register(body: RegisterRequest, db: Session = Depends(get_session)):
     db_user = Users(
         email=body.email,
         password=get_password_hash(body.password),
-        role=UserRole.ADMIN,
+        role=UserRole.USER,
         name=body.name,
     )
     db.add(db_user)
