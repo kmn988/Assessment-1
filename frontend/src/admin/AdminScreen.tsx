@@ -149,7 +149,11 @@ export default function AdminScreen() {
                 <tr
                   className=" border-t-2 h-20 border-solid"
                   key={item.id}
-                  onClick={() => navigate(`users/${item.id}`)}
+                  onClick={() => {
+                    if (item.role === "ADMIN") {
+                      return;
+                    }
+                    navigate(`users/${item.id}`)}}
                 >
                   <td className="p-3">
                     <div className=" flex flex-col justify-center gap-1">
@@ -169,7 +173,9 @@ export default function AdminScreen() {
                           <div key={button.title}>
                             <button
                               className={`border-solid border-2 rounded-lg px-2 hover:cursor-pointer text-black ${button.style}`}
-                              onClick={() => button.action(item)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                button.action(item)}}
                             >
                               {button.title}
                             </button>
