@@ -114,7 +114,8 @@ const ExpenseTable = () => {
   };
 
   const handleEdit = async (form: Omit<Expense, "id">) => {
-    await update_expense_by_id({ id: selectedExpense?.id, params: form });
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    await update_expense_by_id({ id: selectedExpense?.id, params: {user_id: user.id, ...form} });
     fetchExpenses();
     fetchExpenseByCategory();
   };
