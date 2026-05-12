@@ -20,7 +20,11 @@ const Menu = ({ setTab, tab, onLogout }: MenuProps) => {
         {tabs.map((tabName, i) => (
           <button
             className={`menu-tab ${tab === i ? "menu-tab-active" : ""}`}
-            onClick={() => setTab(i)}
+            onClick={() => {
+              setTab(i)
+              if (user.role === "ADMIN") {
+                navigate("/admin");
+            }}}
             key={i}
             type="button"
           >

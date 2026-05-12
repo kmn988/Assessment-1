@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import "./AdminScreen.css";
 import { get_user_detail } from "../config/api";
 import { CATEGORIES, COLORS } from "../config/value";
 import BarChart from "../trend/BarChart";
+import { useNavigate } from "react-router-dom";
 
 type ApiUser = {
   id: string;
@@ -51,7 +52,7 @@ export default function UserDetail() {
     trendValues.length > 0 ? totalSpend / trendValues.length : 0;
   const thisMonthKey = `${year}-${String(new Date().getMonth() + 1).padStart(2, "0")}`;
   const thisMonthSpend = trend[thisMonthKey] ?? 0;
-
+  const navigate = useNavigate();
   if (loading || error || !user) {
     return (
       <div className="admin-screen">
@@ -73,7 +74,7 @@ export default function UserDetail() {
     <div className="admin-screen w-full col-span-1">
       <div className="admin-main w-full">
         <div className="admin-breadcrumbs">
-          <button type="button" className="admin-breadcrumb-link">
+          <button type="button" className="admin-breadcrumb-link" onClick={()=> navigate('/admin')}>
             Users
           </button>
           <span className="admin-breadcrumb-sep">/</span>
