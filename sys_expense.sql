@@ -1,0 +1,58 @@
+-- MySQL dump 10.13  Distrib 8.0.45, for Win64 (x86_64)
+--
+-- Host: localhost    Database: sys
+-- ------------------------------------------------------
+-- Server version	8.0.45
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!50503 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `expense`
+--
+
+DROP TABLE IF EXISTS `expense`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `expense` (
+  `id` char(32) NOT NULL,
+  `user_id` char(32) NOT NULL,
+  `title` varchar(256) NOT NULL,
+  `category` varchar(256) NOT NULL,
+  `date` varchar(256) NOT NULL,
+  `amount` float NOT NULL,
+  `description` varchar(256) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `ix_expense_user_id` (`user_id`),
+  CONSTRAINT `expense_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `expense`
+--
+
+LOCK TABLES `expense` WRITE;
+/*!40000 ALTER TABLE `expense` DISABLE KEYS */;
+INSERT INTO `expense` VALUES ('0e031d8e72bd4a6d844f3ec3cc101830','faa0690b2350442d94052998308053f4','mobile phone','ENTERTAINMENT','2026-05-19',500,''),('2a2f98392fea4f189d5c3b2f88734985','ac414a4470604ef88694a56f41ed8466','string','FOOD','2026-05-09',10,'string'),('5d4cc8c2972c4b99af402d75d4d0dc69','824984cd0b304b57b8417bd1ccc2a431','grocery','UTILITIES','2026-05-19',20,''),('782fbd95da5447c29b573ae644504362','faa0690b2350442d94052998308053f4','grocery','FOOD','2026-05-19',200,''),('9d655bd2846b44fdbe82d7f2b079e511','ac414a4470604ef88694a56f41ed8466','abc','FOOD','2026-05-09',100,'string'),('a123ae8b489e4e46b88156412f2b7428','ac414a4470604ef88694a56f41ed8466','abc','HEALTH','2026-05-09',110,''),('e651a753a18441c1966f190eb67a59d7','824984cd0b304b57b8417bd1ccc2a431','eating','FOOD','2026-05-19',500,'');
+/*!40000 ALTER TABLE `expense` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2026-05-19 12:13:51
