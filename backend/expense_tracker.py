@@ -1,7 +1,7 @@
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from db_connection import get_session
-from models.user_model import LoginRequest, Users, RegisterRequest, UserRole
+from models.user_model import CreateUserRequest, LoginRequest, Users, UserRole
 from security import (
     create_access_token,
     get_password_hash,
@@ -71,13 +71,13 @@ async def login(
 
 
 @app.post("/register")
-async def register(body: RegisterRequest, db: Session = Depends(get_session)):
+async def register(body: CreateUserRequest, db: Session = Depends(get_session)):
     if db.exec(select(Users).where(Users.email == body.email)).first():
         raise HTTPException(status_code=400, detail="Email already registered")
     db_user = Users(
         email=body.email,
         password=get_password_hash(body.password),
-        role=UserRole.USER,
+        role=body.role,
         name=body.name,
     )
     db.add(db_user)

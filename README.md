@@ -121,12 +121,16 @@ Install dependencies:
 pip install -r requirement.txt
 ```
 
-Update database credentials in `expense_tracker_crud.py` if needed:
+Create .env file with database credentials:
 
-```python
-username = "root"
-password = "your_password"
-database_name = "sys"
+```properties
+db_username='your_username'
+db_password='your_password'
+db_host='your_localhost'
+db_port='your_port'
+db_name ='your_db_name'
+SECRET_KEY = 'your_secret_key'
+ALGORITHM = 'your_algorithm'
 ```
 
 Start the backend server:
@@ -136,6 +140,17 @@ uvicorn expense_tracker:app --reload
 ```
 
 The API will be available at `http://127.0.0.1:8000`. You can view the auto-generated docs at `http://127.0.0.1:8000/docs`.
+
+Create an ADMIN account: go to `http://127.0.0.1:8000/docs#/default/register_register_post` and modify request body
+
+```json
+{
+  "email": "admin@gmail.com",
+  "password": "Abc1234@",
+  "name": "Admin",
+  "role": "ADMIN"
+}
+```
 
 ---
 
@@ -159,7 +174,7 @@ Start the development server:
 npm run dev
 ```
 
-The app will be available at `http://localhost:5173`.
+The app will be available at `http://localhost:5173`. Register an account and start tracking your expenses.
 
 ---
 
